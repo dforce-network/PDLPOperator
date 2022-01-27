@@ -91,10 +91,10 @@ abstract contract FlashVaultOperator is OperatorBase {
 
   function approveAll() internal {
     // approve to iToken
-    USX.safeApprove(address(iToken), uint256(-1));
+    USX.approve(address(iToken), uint256(-1));
 
     // approve to viToken
-    IERC20Upgradeable(address(iToken)).safeApprove(
+    IERC20Upgradeable(address(iToken)).approve(
       address(viToken),
       uint256(-1)
     );
@@ -105,7 +105,7 @@ abstract contract FlashVaultOperator is OperatorBase {
     require(_results[0], "approveAll: Fail to enter market!");
 
     // approve vToken to mint vToken and repay underlying
-    USX.safeApprove(address(vToken), uint256(-1));
+    USX.approve(address(vToken), uint256(-1));
   }
 
   /*********************************/

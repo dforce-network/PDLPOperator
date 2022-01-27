@@ -92,17 +92,17 @@ contract L1Operator is Initializable, ReentrancyGuard, Whitelists {
 
   function approveAll() internal {
     // approve to iToken
-    underlying.safeApprove(address(iToken), uint256(-1));
+    underlying.approve(address(iToken), uint256(-1));
 
     // approve to iiToken
-    IERC20(address(iToken)).safeApprove(address(iiToken), uint256(-1));
+    IERC20(address(iToken)).approve(address(iiToken), uint256(-1));
 
     address[] memory collaterals = new address[](1);
     collaterals[0] = address(iiToken);
     controllerFlashVault.enterMarkets(collaterals);
 
     // approve iMtoken
-    underlying.safeApprove(address(iMToken), uint256(-1));
+    underlying.approve(address(iMToken), uint256(-1));
   }
 
   /*********************************/

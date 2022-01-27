@@ -36,7 +36,7 @@ abstract contract L2Operator is OperatorBase {
     L2Bridge = _L2Bridge;
 
     // approve underlying to cBridge
-    USX.safeApprove(address(cBridge), uint256(-1));
+    USX.approve(address(cBridge), uint256(-1));
   }
 
   /**
