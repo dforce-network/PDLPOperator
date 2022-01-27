@@ -4,9 +4,9 @@ pragma solidity 0.6.12;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-import "./library/Initializable.sol";
-import "./library/ReentrancyGuard.sol";
-import "./library/Whitelists.sol";
+import "../library/Initializable.sol";
+import "../library/ReentrancyGuard.sol";
+import "../library/Whitelists.sol";
 
 abstract contract OperatorBase is Initializable, ReentrancyGuard, Whitelists {
   using SafeERC20Upgradeable for IERC20Upgradeable;

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "./L1Operator.sol";
-import "./CBridgeOperator.sol";
+import "./base/L1Operator.sol";
+import "./base/CBridgeOperator.sol";
 
 contract BSCOperator is L1Operator, CBridgeOperator {
   function initialize(

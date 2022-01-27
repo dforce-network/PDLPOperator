@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "./library/SafeRatioMath.sol";
+import "../library/SafeRatioMath.sol";
 import "./OperatorBase.sol";
 
 interface IiToken {

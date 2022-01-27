@@ -4,10 +4,10 @@ pragma solidity 0.6.12;
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "./library/Whitelists.sol";
-import "./library/Initializable.sol";
-import "./library/ReentrancyGuard.sol";
-import "./library/SafeRatioMath.sol";
+import "../library/Whitelists.sol";
+import "../library/Initializable.sol";
+import "../library/ReentrancyGuard.sol";
+import "../library/SafeRatioMath.sol";
 
 interface IiMToken {
   function isiToken() external returns (bool);

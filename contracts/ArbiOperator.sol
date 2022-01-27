@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "./OperatorBase.sol";
-import "./FlashVaultOperator.sol";
-import "./L2Operator.sol";
+import "./base/OperatorBase.sol";
+import "./base/FlashVaultOperator.sol";
+import "./base/L2Operator.sol";
 
 contract ArbiOperator is OperatorBase, FlashVaultOperator, L2Operator {
   function initialize(
