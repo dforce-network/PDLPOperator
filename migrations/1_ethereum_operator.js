@@ -1,6 +1,7 @@
 import { run, sendTransaction } from "./helpers/utils.js";
 import { deployContracts } from "./helpers/deploy.js";
 import { printArgs } from "./helpers/timelock.js";
+import { attachContractAtAdddress } from "./helpers/contract";
 
 let task = { name: "PDLP" };
 
@@ -183,9 +184,7 @@ async function upgradeEthereumOperator() {
     await task.contracts.ethereumOperator.populateTransaction["upgrade"](
       L2_USX,
       OP_L1_GATEWAY,
-      OP_L2_OPERATOR,
-      task.deployments.dForceLendingProvider.address,
-      task.deployments.liqeeProvider.address
+      OP_L2_OPERATOR
     )
   ).data;
 
@@ -210,9 +209,42 @@ async function upgradeEthereumOperator() {
   // ]);
 }
 
+async function addProviders() {
+  await sendTransaction(task, "ethereumOperator", "_addProvider", [
+    task.deployments.dForceLendingProvider.address,
+  ]);
+
+  await sendTransaction(task, "ethereumOperator", "_addProvider", [
+    task.deployments.liqeeProvider.address,
+  ]);
+}
+
+async function depositTest() {
+  const providers = await task.contracts.ethereumOperator.getProviders();
+
+  let index = 0;
+  for (const providerAddress of providers) {
+    const provider = await attachContractAtAdddress(
+      task.signer,
+      providerAddress,
+      "iTokenProvider",
+      "contracts/base/providers/"
+    );
+    console.log("Going to deposit to", await provider.name());
+
+    await sendTransaction(task, "ethereumOperator", "deposit", [
+      0,
+      ethers.utils.parseEther("10000000"),
+    ]);
+  }
+}
+
 // run(task, deploy);
 // run(task, setOwner);
 // run(task, addUSXMinter);
 // run(task, depositToL2);
 // run(task, addToWhitelists);
+
 run(task, upgradeEthereumOperator);
+run(task, addProviders);
+run(task, depositTest);

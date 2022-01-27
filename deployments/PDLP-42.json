@@ -18,7 +18,7 @@
   },
   "ethereumOperator": {
     "contract": "EthereumOperator",
-    "address": "0xe7ef61F91500fD0098E5301EfBD77941f4A17a18"
+    "address": "0x1ed88B0fe7090F26Cf8c63fF26b42e2904bB83d8"
   },
   "dForceLendingProvider": {
     "contract": "dForceLendingProvider",
@@ -32,6 +32,6 @@
   },
   "ethereumOperatorImpl": {
     "contract": "EthereumOperator",
-    "address": "0x332E6656a3E8B05500847Be97EDce6589467652B"
+    "address": "0x8a9c450ca35E8dD92F912d429f8b23Fa7f42dF62"
   }
 }

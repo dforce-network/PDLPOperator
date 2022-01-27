@@ -82,7 +82,7 @@ export async function attachContractAtAdddress(
 ) {
   // Hardhat has this helper function
   if (typeof remix !== "object") {
-    return (await ethers.getContractFactory(name)).attach(address);
+    return await ethers.getContractAt(name, address);
   }
 
   const contractPath = `browser/artifacts/${path}${name}.sol/${name}.json`;

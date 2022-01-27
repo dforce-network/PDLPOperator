@@ -50,7 +50,7 @@ contract EthereumOperator is
         address _l2OptiOperator,
         address _iTokenProvider,
         address _qTokenProvider
-    ) public initializer {
+    ) public {
         _initialize(
             _usx,
             _vault,
@@ -67,7 +67,7 @@ contract EthereumOperator is
     }
 
     /**
-     * @dev Internal Initializer for the contstructor
+     * @dev Internal Initializer for the constructor
      * no liquidity providers are added
      */
     function _initialize(
@@ -79,7 +79,7 @@ contract EthereumOperator is
         address _l2USX,
         IL1OptiUSXGateway _l1OptiGateway,
         address _l2OptiOperator
-    ) internal {
+    ) internal initializer {
         __VaultBase_init(_usx, _vault);
         __L1ArbiBridgeOperator_init_unchained(_l1ArbiGateway, _l2ArbiOperator);
         __CBridgeOperator_init_unchained(_cBridge);
@@ -94,14 +94,12 @@ contract EthereumOperator is
 
     /**
      * @dev Current Ethereum Operator is a VaultBase, L1BridgeOperator and CBridgeOperator,
-     *      Only set iToken and vToken and Optimism once
+     *      Only set Optimism once, liquidity providers will be added later by owner
      */
     function upgrade(
         address _l2USX,
         IL1OptiUSXGateway _l1OptiGateway,
-        address _l2OptiOperator,
-        address _iTokenProvider,
-        address _qTokenProvider
+        address _l2OptiOperator
     ) external {
         require(address(l2USX) == address(0), "Operator already upgraded");
 
@@ -112,7 +110,5 @@ contract EthereumOperator is
         );
 
         __LiquidityOperator_init_unchained();
-        LiquidityOperator._addProvider(_iTokenProvider);
-        LiquidityOperator._addProvider(_qTokenProvider);
     }
 }
