@@ -3,7 +3,7 @@ pragma solidity 0.6.12;
 
 import "./VaultBase.sol";
 
-interface IOptiL1USXGateway {
+interface IL1OptiUSXGateway {
     function depositERC20To(
         address _l1Token,
         address _l2Token,
@@ -14,48 +14,48 @@ interface IOptiL1USXGateway {
     ) external;
 }
 
-abstract contract OptiL1BridgeOperator is VaultBase {
+abstract contract L1OptiBridgeOperator is VaultBase {
     address public l2USX;
 
-    IOptiL1USXGateway public optiL1USXGateway;
+    IL1OptiUSXGateway public l1OptiUSXGateway;
 
-    address public optiL2Operator;
+    address public l2OptiOperator;
 
-    function __OptiL1BridgeOperator_init(
+    function __L1OptiBridgeOperator_init(
         IERC20Upgradeable _usx,
         IVault _vault,
         address _l2USX,
-        IOptiL1USXGateway _optiL1Gateway,
-        address _optiL2Operator
+        IL1OptiUSXGateway _l1OptiGateway,
+        address _l2OptiOperator
     ) internal {
         __VaultBase_init(_usx, _vault);
-        __OptiL1BridgeOperator_init_unchained(
+        __L1OptiBridgeOperator_init_unchained(
             _l2USX,
-            _optiL1Gateway,
-            _optiL2Operator
+            _l1OptiGateway,
+            _l2OptiOperator
         );
     }
 
-    function __OptiL1BridgeOperator_init_unchained(
+    function __L1OptiBridgeOperator_init_unchained(
         address _l2USX,
-        IOptiL1USXGateway _optiL1Gateway,
-        address _optiL2Operator
+        IL1OptiUSXGateway _l1OptiGateway,
+        address _l2OptiOperator
     ) internal {
         require(address(_l2USX) != address(0), "l2USX can not be zero address");
         require(
-            address(_optiL1Gateway) != address(0),
-            "optiL1Gateway can not be zero address"
+            address(_l1OptiGateway) != address(0),
+            "l1OptiGateway can not be zero address"
         );
         require(
-            address(_optiL2Operator) != address(0),
+            address(_l2OptiOperator) != address(0),
             "optiOperator can not be zero address"
         );
 
         l2USX = _l2USX;
-        optiL1USXGateway = _optiL1Gateway;
-        optiL2Operator = _optiL2Operator;
+        l1OptiUSXGateway = _l1OptiGateway;
+        l2OptiOperator = _l2OptiOperator;
 
-        USX.approve(address(optiL1USXGateway), uint256(-1));
+        USX.approve(address(l1OptiUSXGateway), uint256(-1));
     }
 
     /**
@@ -71,10 +71,10 @@ abstract contract OptiL1BridgeOperator is VaultBase {
     ) external payable nonReentrant onlyWhitelist(msg.sender) {
         vault.borrow(_amount);
 
-        optiL1USXGateway.depositERC20To(
+        l1OptiUSXGateway.depositERC20To(
             address(USX),
             address(l2USX),
-            optiL2Operator,
+            l2OptiOperator,
             _amount,
             _l2Gas,
             _data

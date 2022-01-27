@@ -1,91 +1,91 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "./base/ArbiL1BridgeOperator.sol";
-import "./base/OptiL1BridgeOperator.sol";
+import "./base/L1ArbiBridgeOperator.sol";
+import "./base/L1OptiBridgeOperator.sol";
 import "./base/CBridgeOperator.sol";
 import "./base/LiquidityOperator.sol";
 
 contract EthereumOperator is
-  VaultBase,
-  ArbiL1BridgeOperator,
-  CBridgeOperator,
-  OptiL1BridgeOperator,
-  LiquidityOperator
+    VaultBase,
+    L1ArbiBridgeOperator,
+    CBridgeOperator,
+    L1OptiBridgeOperator,
+    LiquidityOperator
 {
-  constructor(
-    IERC20Upgradeable _usx,
-    IVault _vault,
-    IArbiL1USXGateway _arbiL1Gateway,
-    address _arbiL2Operator,
-    IcBridge _cBridge,
-    address _l2USX,
-    IOptiL1USXGateway _optiL1Gateway,
-    address _optiL2Operator,
-    address _iTokenProvider,
-    address _qTokenProvider
-  ) public {
-    initialize(
-      _usx,
-      _vault,
-      _arbiL1Gateway,
-      _arbiL2Operator,
-      _cBridge,
-      _l2USX,
-      _optiL1Gateway,
-      _optiL2Operator,
-      _iTokenProvider,
-      _qTokenProvider
-    );
-  }
+    constructor(
+        IERC20Upgradeable _usx,
+        IVault _vault,
+        IL1ArbiUSXGateway _l1ArbiGateway,
+        address _l2ArbiOperator,
+        IcBridge _cBridge,
+        address _l2USX,
+        IL1OptiUSXGateway _l1OptiGateway,
+        address _l2OptiOperator,
+        address _iTokenProvider,
+        address _qTokenProvider
+    ) public {
+        initialize(
+            _usx,
+            _vault,
+            _l1ArbiGateway,
+            _l2ArbiOperator,
+            _cBridge,
+            _l2USX,
+            _l1OptiGateway,
+            _l2OptiOperator,
+            _iTokenProvider,
+            _qTokenProvider
+        );
+    }
 
-  function initialize(
-    IERC20Upgradeable _usx,
-    IVault _vault,
-    IArbiL1USXGateway _arbiL1Gateway,
-    address _arbiL2Operator,
-    IcBridge _cBridge,
-    address _l2USX,
-    IOptiL1USXGateway _optiL1Gateway,
-    address _optiL2Operator,
-    address _iTokenProvider,
-    address _qTokenProvider
-  ) public initializer {
-    __VaultBase_init(_usx, _vault);
-    __ArbiL1BridgeOperator_init_unchained(_arbiL1Gateway, _arbiL2Operator);
-    __CBridgeOperator_init_unchained(_cBridge);
-    __OptiL1BridgeOperator_init_unchained(
-      _l2USX,
-      _optiL1Gateway,
-      _optiL2Operator
-    );
+    function initialize(
+        IERC20Upgradeable _usx,
+        IVault _vault,
+        IL1ArbiUSXGateway _l1ArbiGateway,
+        address _l2ArbiOperator,
+        IcBridge _cBridge,
+        address _l2USX,
+        IL1OptiUSXGateway _l1OptiGateway,
+        address _l2OptiOperator,
+        address _iTokenProvider,
+        address _qTokenProvider
+    ) public initializer {
+        __VaultBase_init(_usx, _vault);
+        __L1ArbiBridgeOperator_init_unchained(_l1ArbiGateway, _l2ArbiOperator);
+        __CBridgeOperator_init_unchained(_cBridge);
+        __L1OptiBridgeOperator_init_unchained(
+            _l2USX,
+            _l1OptiGateway,
+            _l2OptiOperator
+        );
 
-    __LiquidityOperator_init_unchained();
-    LiquidityOperator._addProvider(_iTokenProvider);
-    LiquidityOperator._addProvider(_qTokenProvider);
-  }
+        __LiquidityOperator_init_unchained();
+        LiquidityOperator._addProvider(_iTokenProvider);
+        LiquidityOperator._addProvider(_qTokenProvider);
+    }
 
-  /**
-   * @dev Current Ethereum Operator is a VaultBase, L1BridgeOperator and CBridgeOperator,
-   *      Only set iToken and vToken and Optimism once
-   */
-  function upgrade(
-    address _l2USX,
-    IOptiL1USXGateway _optiL1Gateway,
-    address _optiL2Operator,
-    address _iTokenProvider,
-    address _qTokenProvider
-  ) external {
-    require(address(l2USX) == address(0), "Operator already upgraded");
+    /**
+     * @dev Current Ethereum Operator is a VaultBase, L1BridgeOperator and CBridgeOperator,
+     *      Only set iToken and vToken and Optimism once
+     */
+    function upgrade(
+        address _l2USX,
+        IL1OptiUSXGateway _l1OptiGateway,
+        address _l2OptiOperator,
+        address _iTokenProvider,
+        address _qTokenProvider
+    ) external {
+        require(address(l2USX) == address(0), "Operator already upgraded");
 
-    __OptiL1BridgeOperator_init_unchained(
-      _l2USX,
-      _optiL1Gateway,
-      _optiL2Operator
-    );
+        __L1OptiBridgeOperator_init_unchained(
+            _l2USX,
+            _l1OptiGateway,
+            _l2OptiOperator
+        );
 
-    __LiquidityOperator_init_unchained();
-    LiquidityOperator._addProvider(_iTokenProvider);
-    LiquidityOperator._addProvider(_qTokenProvider);
-  }
+        __LiquidityOperator_init_unchained();
+        LiquidityOperator._addProvider(_iTokenProvider);
+        LiquidityOperator._addProvider(_qTokenProvider);
+    }
 }

@@ -3,7 +3,7 @@ pragma solidity 0.6.12;
 
 import "./VaultBase.sol";
 
-interface IArbiL1USXGateway {
+interface IL1ArbiUSXGateway {
     function outboundTransfer(
         address l1Token,
         address to,
@@ -14,38 +14,38 @@ interface IArbiL1USXGateway {
     ) external payable returns (bytes memory);
 }
 
-abstract contract ArbiL1BridgeOperator is VaultBase {
-    IArbiL1USXGateway public arbiL1USXGateway;
+abstract contract L1ArbiBridgeOperator is VaultBase {
+    IL1ArbiUSXGateway public l1ArbiUSXGateway;
 
-    address public arbiL2Operator;
+    address public l2ArbiOperator;
 
-    function __ArbiBridgeOperator_init(
+    function __L1ArbiBridgeOperator_init(
         IERC20Upgradeable _usx,
         IVault _vault,
-        IArbiL1USXGateway _arbiL1Gateway,
-        address _arbiL2Operator
+        IL1ArbiUSXGateway _l1ArbiGateway,
+        address _l2ArbiOperator
     ) internal {
         __VaultBase_init(_usx, _vault);
-        __ArbiL1BridgeOperator_init_unchained(_arbiL1Gateway, _arbiL2Operator);
+        __L1ArbiBridgeOperator_init_unchained(_l1ArbiGateway, _l2ArbiOperator);
     }
 
-    function __ArbiL1BridgeOperator_init_unchained(
-        IArbiL1USXGateway _arbiL1Gateway,
-        address _arbiL2Operator
+    function __L1ArbiBridgeOperator_init_unchained(
+        IL1ArbiUSXGateway _l1ArbiGateway,
+        address _l2ArbiOperator
     ) internal {
         require(
-            address(_arbiL1Gateway) != address(0),
-            "arbiL1Gateway can not be zero address"
+            address(_l1ArbiGateway) != address(0),
+            "l1ArbiGateway can not be zero address"
         );
         require(
-            address(_arbiL2Operator) != address(0),
+            address(_l2ArbiOperator) != address(0),
             "arbiOperator can not be zero address"
         );
 
-        arbiL1USXGateway = _arbiL1Gateway;
-        arbiL2Operator = _arbiL2Operator;
+        l1ArbiUSXGateway = _l1ArbiGateway;
+        l2ArbiOperator = _l2ArbiOperator;
 
-        USX.approve(address(arbiL1USXGateway), uint256(-1));
+        USX.approve(address(l1ArbiUSXGateway), uint256(-1));
     }
 
     /**
@@ -63,9 +63,9 @@ abstract contract ArbiL1BridgeOperator is VaultBase {
     ) external payable nonReentrant onlyWhitelist(msg.sender) {
         vault.borrow(_amount);
 
-        arbiL1USXGateway.outboundTransfer{ value: msg.value }(
+        l1ArbiUSXGateway.outboundTransfer{ value: msg.value }(
             address(USX),
-            arbiL2Operator,
+            l2ArbiOperator,
             _amount,
             _maxGas,
             _gasPriceBid,
