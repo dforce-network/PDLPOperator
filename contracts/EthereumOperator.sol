@@ -13,6 +13,32 @@ contract EthereumOperator is
   OptiL1BridgeOperator,
   LiquidityOperator
 {
+  constructor(
+    IERC20Upgradeable _usx,
+    IVault _vault,
+    IArbiL1USXGateway _arbiL1Gateway,
+    address _arbiL2Operator,
+    IcBridge _cBridge,
+    address _l2USX,
+    IOptiL1USXGateway _optiL1Gateway,
+    address _optiL2Operator,
+    address _iTokenProvider,
+    address _qTokenProvider
+  ) public {
+    initialize(
+      _usx,
+      _vault,
+      _arbiL1Gateway,
+      _arbiL2Operator,
+      _cBridge,
+      _l2USX,
+      _optiL1Gateway,
+      _optiL2Operator,
+      _iTokenProvider,
+      _qTokenProvider
+    );
+  }
+
   function initialize(
     IERC20Upgradeable _usx,
     IVault _vault,
@@ -24,7 +50,7 @@ contract EthereumOperator is
     address _optiL2Operator,
     address _iTokenProvider,
     address _qTokenProvider
-  ) external initializer {
+  ) public initializer {
     __VaultBase_init(_usx, _vault);
     __ArbiL1BridgeOperator_init_unchained(_arbiL1Gateway, _arbiL2Operator);
     __CBridgeOperator_init_unchained(_cBridge);

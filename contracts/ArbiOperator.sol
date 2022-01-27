@@ -6,13 +6,23 @@ import "./base/FlashVaultOperator.sol";
 import "./base/L2Operator.sol";
 
 contract ArbiOperator is OperatorBase, FlashVaultOperator, L2Operator {
+  constructor(
+    IERC20Upgradeable _usx,
+    address _vToken,
+    address _viToken,
+    address _cBridge,
+    address _l2Bridge
+  ) public {
+    initialize(_usx, _vToken, _viToken, _cBridge, _l2Bridge);
+  }
+
   function initialize(
     IERC20Upgradeable _usx,
     address _vToken,
     address _viToken,
     address _cBridge,
     address _l2Bridge
-  ) external initializer {
+  ) public initializer {
     __OperatorBase_init(_usx);
     __FlashVaultOperator_init_unchained(_vToken, _viToken);
     __L2Operator_init_unchained(_cBridge, _l2Bridge);

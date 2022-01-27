@@ -5,13 +5,23 @@ import "./base/L1Operator.sol";
 import "./base/CBridgeOperator.sol";
 
 contract BSCOperator is L1Operator, CBridgeOperator {
+  constructor(
+    address _viToken,
+    address _vMToken,
+    IERC20Upgradeable _usx,
+    IVault _vault,
+    IcBridge _cBridge
+  ) public {
+    initialize(_viToken, _vMToken, _usx, _vault, _cBridge);
+  }
+
   function initialize(
     address _viToken,
     address _vMToken,
     IERC20Upgradeable _usx,
     IVault _vault,
     IcBridge _cBridge
-  ) external initializer {
+  ) public initializer {
     L1Operator.initialize(_viToken, _vMToken);
 
     __CBridgeOperator_init(_usx, _vault, _cBridge);
