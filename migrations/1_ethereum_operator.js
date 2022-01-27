@@ -21,8 +21,8 @@ let deployInfo = {
     MINT_CAP: ethers.utils.parseEther("300000000"),
     OP_L1_GATEWAY: "0x870ac6a76A30742800609F205c741E86Db9b71a2",
     OP_L2_OPERATOR: "0x1D2eB423bC723DA7f927CA21B56A4C22aF6C72B4",
-    iUSX: "",
-    qUSX: "",
+    iUSX: "0x1AdC34Af68e970a93062b67344269fD341979eb0",
+    qUSX: "0xA5d65E3bD7411D409EC2CCFa30C6511bA8a99D2B",
   },
   rinkeby: {
     USX: "0x2D76117C2C85c2E9C9FBF08199C9Be59af887526",
@@ -233,9 +233,11 @@ async function depositTest() {
     console.log("Going to deposit to", await provider.name());
 
     await sendTransaction(task, "ethereumOperator", "deposit", [
-      0,
+      index,
       ethers.utils.parseEther("10000000"),
     ]);
+
+    index++;
   }
 }
 
@@ -245,6 +247,6 @@ async function depositTest() {
 // run(task, depositToL2);
 // run(task, addToWhitelists);
 
-run(task, upgradeEthereumOperator);
-run(task, addProviders);
+// run(task, upgradeEthereumOperator);
+// run(task, addProviders);
 run(task, depositTest);
