@@ -86,9 +86,6 @@ abstract contract FlashVaultOperator is OperatorBase {
     address _controllerAddress = viToken.controller();
     controllerFlashVault = IControllerFlashVault(_controllerAddress);
 
-    __Whitelist_init();
-    __ReentrancyGuard_init();
-
     approveAll();
   }
 
@@ -108,7 +105,7 @@ abstract contract FlashVaultOperator is OperatorBase {
     require(_results[0], "approveAll: Fail to enter market!");
 
     // approve vToken to mint vToken and repay underlying
-    USX.approve(address(vToken), uint256(-1));
+    USX.safeApprove(address(vToken), uint256(-1));
   }
 
   /*********************************/

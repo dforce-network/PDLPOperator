@@ -102,7 +102,7 @@ contract L1Operator is Initializable, ReentrancyGuard, Whitelists {
     controllerFlashVault.enterMarkets(collaterals);
 
     // approve iMtoken
-    underlying.approve(address(iMToken), uint256(-1));
+    underlying.safeApprove(address(iMToken), uint256(-1));
   }
 
   /*********************************/
