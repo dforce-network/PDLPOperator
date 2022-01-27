@@ -24,11 +24,23 @@ export default {
   mocha: { timeout: 2000000 },
   networks: {
     hardhat: {
-      forking: {
-        // url: "https://eth-mainnet.alchemyapi.io/v2/" + alchemyKey,
-        // url: "https://bsc-dataseed.binance.org/",
-        url: "https://arb-mainnet.g.alchemy.com/v2/" + alchemyKey,
-      },
+      // forking: {
+      //   // url: "https://eth-mainnet.alchemyapi.io/v2/" + alchemyKey,
+      //   // url: "https://bsc-dataseed.binance.org/",
+      //   url: "https://arb-mainnet.g.alchemy.com/v2/" + alchemyKey,
+      // },
+    },
+    kovan: {
+      url: `https://kovan.infura.io/v3/${infuraKey}`,
+      accounts: [`0x${privateKey}`],
+      gas: 8000000,
+      gasPrice: 5000000000, // 5gWei
+      timeout: 200000,
+    },
+    rinkeby: {
+      url: `https://rinkeby.infura.io/v3/${infuraKey}`,
+      accounts: [`0x${privateKey}`],
+      gas: 8000000,
     },
   },
   solidity: {
