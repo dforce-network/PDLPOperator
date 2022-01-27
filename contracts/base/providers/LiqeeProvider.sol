@@ -6,6 +6,6 @@ import "./iTokenProvider.sol";
 contract LiqeeProvider is iTokenProvider {
     constructor(address _qToken)
         public
-        iTokenProvider(bytes32("Liqee"), _qToken)
+        iTokenProvider(bytes32("LiqeeProvider"), _qToken)
     {}
 }
