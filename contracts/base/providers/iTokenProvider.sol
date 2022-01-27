@@ -28,17 +28,3 @@ abstract contract iTokenProvider is ProviderBase {
         iToken.redeemUnderlying(address(this), _amount);
     }
 }
-
-contract dForceLendingProvider is iTokenProvider {
-    constructor(address _iToken)
-        public
-        iTokenProvider(bytes32("dForceLending"), _iToken)
-    {}
-}
-
-contract LiqeeProvider is iTokenProvider {
-    constructor(address _qToken)
-        public
-        iTokenProvider(bytes32("Liqee"), _qToken)
-    {}
-}

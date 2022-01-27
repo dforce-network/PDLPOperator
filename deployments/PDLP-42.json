@@ -1,0 +1,37 @@
+{
+  "proxyAdmin": {
+    "contract": "ProxyAdmin",
+    "path": "contracts/library/",
+    "address": "0xeFF5fAA89B52c8F02f1bA14AD1b8F732E8f5648a"
+  },
+  "MiniMinterImpl": {
+    "contract": "MiniMinter",
+    "address": "0x158C8011B3A0FD24D038F2094C789819CdebeA7A"
+  },
+  "pdlpMiniMinter": {
+    "contract": "MiniMinter",
+    "address": "0xc1F0d72C035ff1a7a81DC89B834d4b3485B25698"
+  },
+  "ethereumOperatorImpl____": {
+    "contract": "EthereumOperator",
+    "address": "0x18D3eBfE64edf076b740F664D9bFef06D6EBcB3F"
+  },
+  "ethereumOperator": {
+    "contract": "EthereumOperator",
+    "address": "0xe7ef61F91500fD0098E5301EfBD77941f4A17a18"
+  },
+  "dForceLendingProvider": {
+    "contract": "dForceLendingProvider",
+    "path": "contracts/base/providers/",
+    "address": "0x1Cd7f47667ccfdB7F72c99877AEA878D5C1d076C"
+  },
+  "liqeeProvider": {
+    "contract": "LiqeeProvider",
+    "path": "contracts/base/providers/",
+    "address": "0x1b426a642f635869e6E41B9349E84cE7c693b6B1"
+  },
+  "ethereumOperatorImpl": {
+    "contract": "EthereumOperator",
+    "address": "0x332E6656a3E8B05500847Be97EDce6589467652B"
+  }
+}

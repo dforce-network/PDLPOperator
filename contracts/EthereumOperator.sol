@@ -21,11 +21,9 @@ contract EthereumOperator is
         IcBridge _cBridge,
         address _l2USX,
         IL1OptiUSXGateway _l1OptiGateway,
-        address _l2OptiOperator,
-        address _iTokenProvider,
-        address _qTokenProvider
+        address _l2OptiOperator
     ) public {
-        initialize(
+        _initialize(
             _usx,
             _vault,
             _l1ArbiGateway,
@@ -33,12 +31,14 @@ contract EthereumOperator is
             _cBridge,
             _l2USX,
             _l1OptiGateway,
-            _l2OptiOperator,
-            _iTokenProvider,
-            _qTokenProvider
+            _l2OptiOperator
         );
     }
 
+    /**
+     * @dev External Initializer for the proxy
+     * it will add the _iTokenProvider and _qTokenProvider by default
+     */
     function initialize(
         IERC20Upgradeable _usx,
         IVault _vault,
@@ -51,6 +51,35 @@ contract EthereumOperator is
         address _iTokenProvider,
         address _qTokenProvider
     ) public initializer {
+        _initialize(
+            _usx,
+            _vault,
+            _l1ArbiGateway,
+            _l2ArbiOperator,
+            _cBridge,
+            _l2USX,
+            _l1OptiGateway,
+            _l2OptiOperator
+        );
+
+        LiquidityOperator._addProvider(_iTokenProvider);
+        LiquidityOperator._addProvider(_qTokenProvider);
+    }
+
+    /**
+     * @dev Internal Initializer for the contstructor
+     * no liquidity providers are added
+     */
+    function _initialize(
+        IERC20Upgradeable _usx,
+        IVault _vault,
+        IL1ArbiUSXGateway _l1ArbiGateway,
+        address _l2ArbiOperator,
+        IcBridge _cBridge,
+        address _l2USX,
+        IL1OptiUSXGateway _l1OptiGateway,
+        address _l2OptiOperator
+    ) internal {
         __VaultBase_init(_usx, _vault);
         __L1ArbiBridgeOperator_init_unchained(_l1ArbiGateway, _l2ArbiOperator);
         __CBridgeOperator_init_unchained(_cBridge);
@@ -61,8 +90,6 @@ contract EthereumOperator is
         );
 
         __LiquidityOperator_init_unchained();
-        LiquidityOperator._addProvider(_iTokenProvider);
-        LiquidityOperator._addProvider(_qTokenProvider);
     }
 
     /**

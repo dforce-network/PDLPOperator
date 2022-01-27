@@ -1,0 +1,26 @@
+{
+  "proxyAdmin": {
+    "contract": "ProxyAdmin",
+    "path": "contracts/library/",
+    "address": "0xd7395ae733BAC16E1B024c4486f883AC3878C077"
+  },
+  "MiniMinterImpl": {
+    "contract": "MiniMinter",
+    "address": "0x2293044610B9A0eaf259c9Af62e8303c0E389DA2"
+  },
+  "pdlpMiniMinter": {
+    "contract": "MiniMinter",
+    "path": "contracts/msd/",
+    "address": "0x632D1B295FA9A8E36500d84404d5316E0cDd3941"
+  },
+  "EthereumOperatorImpl____": {
+    "contract": "EthereumOperator",
+    "path": "contracts/operator/",
+    "address": "0xD270e0D984EF138eF8C9100D8d1B5661817F1a7E"
+  },
+  "ethereumOperator": {
+    "contract": "EthereumOperator",
+    "path": "contracts/operator/",
+    "address": "0xF9BA268e7f8f6bef80a6c74f916295e1cB50485d"
+  }
+}
