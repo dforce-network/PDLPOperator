@@ -17,7 +17,7 @@
     "contract": "MiniMinter",
     "address": "0xA7A084538DE04d808f20C785762934Dd5dA7b3B4"
   },
-  "ethereumOperator____": {
+  "EthereumOperatorImpl____": {
     "contract": "EthereumOperator",
     "address": "0xFE5Ad9975B533456caFCA9727C9AB47cbaB1FA3C"
   },

@@ -93,14 +93,14 @@ contract EthereumOperator is
     }
 
     /**
-     * @dev Current Ethereum Operator is a VaultBase, L1BridgeOperator and CBridgeOperator,
-     *      Only set Optimism once, liquidity providers will be added later by owner
+     * @dev Current Ethereum Operator is a VaultBase, L1ArbiBridgeOperator and CBridgeOperator,
+     *      Only set Optimism once, liquidity providers will be added separately
      */
     function upgrade(
         address _l2USX,
         IL1OptiUSXGateway _l1OptiGateway,
         address _l2OptiOperator
-    ) external {
+    ) external onlyOwner {
         require(address(l2USX) == address(0), "Operator already upgraded");
 
         __L1OptiBridgeOperator_init_unchained(

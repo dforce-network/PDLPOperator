@@ -180,33 +180,31 @@ async function upgradeEthereumOperator() {
 
   await deployContracts(task);
 
-  const upgradeCalldata = (
-    await task.contracts.ethereumOperator.populateTransaction["upgrade"](
-      L2_USX,
-      OP_L1_GATEWAY,
-      OP_L2_OPERATOR
-    )
-  ).data;
+  // const upgradeCalldata = (
+  //   await task.contracts.ethereumOperator.populateTransaction["upgrade"](
+  //     L2_USX,
+  //     OP_L1_GATEWAY,
+  //     OP_L2_OPERATOR
+  //   )
+  // ).data;
 
   // Direct sendTransaction if no Timelock
-  await sendTransaction(task, "proxyAdmin", "upgradeAndCall", [
-    task.deployments.ethereumOperator.address,
-    task.deployments.ethereumOperatorImpl.address,
-    upgradeCalldata,
-  ]);
+  // await sendTransaction(task, "proxyAdmin", "upgrade", [
+  //   task.deployments.ethereumOperator.address,
+  //   task.deployments.ethereumOperatorImpl.address,
+  // ]);
 
   // print data if use Timelock
-  // await printArgs(task, [
-  //   [
-  //     "proxyAdmin",
-  //     "upgradeAndCall",
-  //     [
-  //       task.deployments.ethereumOperator.address,
-  //       task.deployments.ethereumOperatorImpl.address,
-  //       upgradeCalldata,
-  //     ],
-  //   ],
-  // ]);
+  await printArgs(task, [
+    [
+      "proxyAdmin",
+      "upgrade",
+      [
+        task.deployments.ethereumOperator.address,
+        task.deployments.ethereumOperatorImpl.address,
+      ],
+    ],
+  ]);
 }
 
 async function addProviders() {
@@ -247,6 +245,6 @@ async function depositTest() {
 // run(task, depositToL2);
 // run(task, addToWhitelists);
 
-// run(task, upgradeEthereumOperator);
-// run(task, addProviders);
+run(task, upgradeEthereumOperator);
+run(task, addProviders);
 run(task, depositTest);
