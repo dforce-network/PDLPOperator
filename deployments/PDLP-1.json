@@ -24,5 +24,19 @@
   "ethereumOperator": {
     "contract": "EthereumOperator",
     "address": "0x5268b3c4afb0860D365a093C184985FCFcb65234"
+  },
+  "dForceLendingProvider": {
+    "contract": "dForceLendingProvider",
+    "path": "contracts/base/providers/",
+    "address": "0x0c92617dF0753Af1CaB2d9Cc6A56173970d81740"
+  },
+  "liqeeProvider": {
+    "contract": "LiqeeProvider",
+    "path": "contracts/base/providers/",
+    "address": "0x3e5De9F2BA58bA036E84d93c81e8DFb0f002DAF6"
+  },
+  "ethereumOperatorImpl": {
+    "contract": "EthereumOperator",
+    "address": "0x94a14Ba6E59f4BE36a77041Ef5590Fe24445876A"
   }
 }
