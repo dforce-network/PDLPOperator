@@ -72,4 +72,29 @@ abstract contract L1ArbiBridgeOperator is VaultBase {
             _data
         );
     }
+
+    /**
+     * @dev Deposit USX to the cross-chain bridge
+     * @param _to target address to deposit on L2.
+     * @param _amount Amount to borrow from the vault and deposit to the bridge.
+     * @param _maxGas Max gas for L2 message submission and execution.
+     * @param _gasPriceBid Gas price bid for L2.
+     */
+    function depositToArbiBridgeTarget(
+        address _to,
+        uint256 _amount,
+        uint256 _maxGas,
+        uint256 _gasPriceBid
+    ) external payable nonReentrant onlyWhitelist(msg.sender) {
+        vault.borrow(_amount);
+
+        l1ArbiUSXGateway.outboundTransfer{ value: msg.value }(
+            address(USX),
+            _to,
+            _amount,
+            _maxGas,
+            _gasPriceBid,
+            ""
+        );
+    }
 }
