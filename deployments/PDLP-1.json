@@ -35,8 +35,12 @@
     "path": "contracts/base/providers/",
     "address": "0x3e5De9F2BA58bA036E84d93c81e8DFb0f002DAF6"
   },
-  "ethereumOperatorImpl": {
+  "ethereumOperatorImpl____": {
     "contract": "EthereumOperator",
     "address": "0x94a14Ba6E59f4BE36a77041Ef5590Fe24445876A"
+  },
+  "ethereumOperatorImpl": {
+    "contract": "EthereumOperator",
+    "address": "0xa89EBE8D7471D7D36AcBFe4B0d086834390399B7"
   }
 }
