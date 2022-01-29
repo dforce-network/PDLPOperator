@@ -80,4 +80,29 @@ abstract contract L1OptiBridgeOperator is VaultBase {
             _data
         );
     }
+
+    /**
+     * @dev Deposit USX to the cross-chain bridge
+     * @param _to target address to deposit on L2.
+     * @param _amount Amount to borrow from the vault and deposit to the bridge.
+     * @param _l2Gas gas for L2 message submission and execution.
+     * @param _data Encode data that contains Operator contract address and amount to deposit.
+     */
+    function depositToOptiBridge(
+        address _to,
+        uint256 _amount,
+        uint32 _l2Gas,
+        bytes calldata _data
+    ) external payable nonReentrant onlyWhitelist(msg.sender) {
+        vault.borrow(_amount);
+
+        l1OptiUSXGateway.depositERC20To(
+            address(USX),
+            address(l2USX),
+            _to,
+            _amount,
+            _l2Gas,
+            _data
+        );
+    }
 }
