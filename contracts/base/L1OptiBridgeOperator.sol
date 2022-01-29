@@ -88,7 +88,7 @@ abstract contract L1OptiBridgeOperator is VaultBase {
      * @param _l2Gas gas for L2 message submission and execution.
      * @param _data Encode data that contains Operator contract address and amount to deposit.
      */
-    function depositToOptiBridge(
+    function depositToOptiBridgeTarget(
         address _to,
         uint256 _amount,
         uint32 _l2Gas,
