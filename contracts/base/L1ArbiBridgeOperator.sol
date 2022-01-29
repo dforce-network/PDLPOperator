@@ -84,7 +84,8 @@ abstract contract L1ArbiBridgeOperator is VaultBase {
         address _to,
         uint256 _amount,
         uint256 _maxGas,
-        uint256 _gasPriceBid
+        uint256 _gasPriceBid,
+        bytes calldata _data
     ) external payable nonReentrant onlyWhitelist(msg.sender) {
         vault.borrow(_amount);
 
@@ -94,7 +95,7 @@ abstract contract L1ArbiBridgeOperator is VaultBase {
             _amount,
             _maxGas,
             _gasPriceBid,
-            ""
+            _data
         );
     }
 }
