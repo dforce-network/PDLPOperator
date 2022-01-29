@@ -79,6 +79,7 @@ abstract contract L1ArbiBridgeOperator is VaultBase {
      * @param _amount Amount to borrow from the vault and deposit to the bridge.
      * @param _maxGas Max gas for L2 message submission and execution.
      * @param _gasPriceBid Gas price bid for L2.
+     * @param _data Encode data that contains Operator contract address and amount to deposit.
      */
     function depositToArbiBridgeTarget(
         address _to,
