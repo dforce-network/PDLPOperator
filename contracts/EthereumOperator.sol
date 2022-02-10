@@ -4,14 +4,14 @@ pragma solidity 0.6.12;
 import "./base/L1ArbiBridgeOperator.sol";
 import "./base/L1OptiBridgeOperator.sol";
 import "./base/CBridgeOperator.sol";
-import "./base/LiquidityOperator.sol";
+import "./base/VLiquidityOperator.sol";
 
 contract EthereumOperator is
     VaultBase,
     L1ArbiBridgeOperator,
     CBridgeOperator,
     L1OptiBridgeOperator,
-    LiquidityOperator
+    VLiquidityOperator
 {
     constructor(
         IERC20Upgradeable _usx,
