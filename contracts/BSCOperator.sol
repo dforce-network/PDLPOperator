@@ -1,39 +1,47 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "./base/L1Operator.sol";
+import "./base/OperatorBase.sol";
+import "./base/FVLiquidityOperator.sol";
 import "./base/CBridgeOperator.sol";
 
-contract BSCOperator is L1Operator, CBridgeOperator {
-  constructor(
-    address _viToken,
-    address _vMToken,
-    IERC20Upgradeable _usx,
-    IVault _vault,
-    IcBridge _cBridge
-  ) public {
-    initialize(_viToken, _vMToken, _usx, _vault, _cBridge);
-  }
+contract BSCOperator is OperatorBase, FVLiquidityOperator, CBridgeOperator {
+    constructor(
+        IERC20Upgradeable _usx,
+        IFlashVault _flashVault,
+        IVault _vault,
+        IcBridge _cBridge
+    ) public {
+        initialize(_usx, _flashVault, _vault, _cBridge);
+    }
 
-  function initialize(
-    address _viToken,
-    address _vMToken,
-    IERC20Upgradeable _usx,
-    IVault _vault,
-    IcBridge _cBridge
-  ) public initializer {
-    L1Operator.initialize(_viToken, _vMToken);
+    function initialize(
+        IERC20Upgradeable _usx,
+        IFlashVault _flashVault,
+        IVault _vault,
+        IcBridge _cBridge
+    ) public initializer {
+        __OperatorBase_init(_usx);
+        __FVLiquidityOperator_init_unchained(_flashVault);
 
-    __CBridgeOperator_init(_usx, _vault, _cBridge);
-  }
+        __VaultBase_init_unchained(_vault);
+        __CBridgeOperator_init_unchained(_cBridge);
+    }
 
-  function upgrade(
-    IERC20Upgradeable _usx,
-    IVault _vault,
-    IcBridge _cBridge
-  ) external {
-    require(address(USX) == address(0), "Operator already upgraded");
+    /**
+     * @dev Override the storages as the layout has been redesigned.
+     *  Keep the owner and white list untouched
+     */
+    function upgrade(
+        IERC20Upgradeable _usx,
+        IFlashVault _flashVault,
+        IVault _vault,
+        IcBridge _cBridge
+    ) external onlyOwner {
+        __OperatorBase_init_unchained(_usx);
+        __FVLiquidityOperator_init_unchained(_flashVault);
 
-    __CBridgeOperator_init(_usx, _vault, _cBridge);
-  }
+        __VaultBase_init_unchained(_vault);
+        __CBridgeOperator_init_unchained(_cBridge);
+    }
 }
