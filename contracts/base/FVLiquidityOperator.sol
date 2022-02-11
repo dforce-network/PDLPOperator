@@ -68,9 +68,12 @@ abstract contract FVLiquidityOperator is OperatorBase, LiquidityOperator {
     function __FVLiquidityOperator_init_unchained(IFlashVault _flashVault)
         internal
     {
+        // Make sure the flashVault is a iToken, it could be a vToken or a vMSD
+        _flashVault.isiToken();
+
         require(
-            !_flashVault.isiToken() && _flashVault.underlying() == address(USX),
-            "Invalid Flash Vault!"
+            _flashVault.underlying() == address(USX),
+            "Flash Vault underlying is not USX!"
         );
 
         flashVault = _flashVault;
@@ -140,7 +143,8 @@ abstract contract FVLiquidityOperator is OperatorBase, LiquidityOperator {
         nonReentrant
         onlyWhitelist(msg.sender)
     {
-        // TODO: check if the index is valid
+        require(_index < providers.length(), "index out of bounds");
+
         currentProvider = uint8(_index + 1);
         flashVault.flashBorrow(_amount);
     }
@@ -156,7 +160,8 @@ abstract contract FVLiquidityOperator is OperatorBase, LiquidityOperator {
         nonReentrant
         onlyWhitelist(msg.sender)
     {
-        // TODO: check if the index is valid
+        require(_index < providers.length(), "index out of bounds");
+
         currentProvider = uint8(_index + 1);
 
         // TODO: calculate exchange rate in provider
