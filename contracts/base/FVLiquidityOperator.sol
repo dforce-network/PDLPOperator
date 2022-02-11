@@ -7,10 +7,12 @@ import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
 import "./VaultBase.sol";
 import "./LiquidityOperator.sol";
 
-interface IvToken {
+interface IFlashVault {
     function isiToken() external returns (bool);
 
     function underlying() external returns (address);
+
+    function controller() external returns (address);
 
     function mint(address _to, uint256 _amount) external;
 
@@ -21,7 +23,7 @@ interface IvToken {
     function flashBorrow(uint256 _borrowAmount) external;
 }
 
-interface IviToken {
+interface IVCollateral {
     function isiToken() external returns (bool);
 
     function underlying() external returns (address);
@@ -40,10 +42,11 @@ interface IControllerFlashVault {
 }
 
 abstract contract FVLiquidityOperator is OperatorBase, LiquidityOperator {
-    IvToken public flashVault;
+    IFlashVault public flashVault;
 
     IControllerFlashVault public controller;
 
+    // provider index for callback dispatch, starts from 1
     uint8 internal currentProvider;
 
     struct CollateralInfo {
@@ -55,36 +58,43 @@ abstract contract FVLiquidityOperator is OperatorBase, LiquidityOperator {
 
     function __FVLiquidityOperator_init(
         IERC20Upgradeable _usx,
-        IvToken _flashVault,
-        IControllerFlashVault _controller
+        IFlashVault _flashVault
     ) internal {
         __OperatorBase_init(_usx);
         __LiquidityOperator_init_unchained();
-        __FVLiquidityOperator_init_unchained(_flashVault, _controller);
+        __FVLiquidityOperator_init_unchained(_flashVault);
     }
 
-    function __FVLiquidityOperator_init_unchained(
-        IvToken _flashVault,
-        IControllerFlashVault _controller
-    ) internal {
+    function __FVLiquidityOperator_init_unchained(IFlashVault _flashVault)
+        internal
+    {
+        require(
+            !_flashVault.isiToken() && _flashVault.underlying() == address(USX),
+            "Invalid Flash Vault!"
+        );
+
         flashVault = _flashVault;
-        controller = _controller;
+        controller = IControllerFlashVault(_flashVault.controller());
     }
 
     function _addProvider(address) public virtual override {
-        revert(
-            "FVLiquidityOperator: use _addProviderWithVCallateral() instead!"
-        );
+        revert("_addProvider: use _addProviderWithVCollateral() instead!");
     }
 
     /**
      * @notice Adds a new provider.
      * @param _provider The provider to add.
      */
-    function _addProviderWithVCallateral(
+    function _addProviderWithVCollateral(
         address _provider,
-        IvToken _vCollateral
+        IVCollateral _vCollateral
     ) public onlyOwner nonReentrant {
+        // TODO: check whether _provider and _vCollateral matches
+        require(
+            _vCollateral.controller() == address(controller),
+            "VCollateral and flash Vault controller mismatch!"
+        );
+
         // Approve the USX to the target pool
         LiquidityOperator._addProvider(_provider);
 
@@ -95,7 +105,10 @@ abstract contract FVLiquidityOperator is OperatorBase, LiquidityOperator {
         address[] memory _collaterals = new address[](1);
         _collaterals[0] = address(_vCollateral);
         bool[] memory _results = controller.enterMarkets(_collaterals);
-        require(_results[0], "_addProvider: Fail to enter market!");
+        require(
+            _results[0],
+            "_addProviderWithVCollateral: Fail to enter market!"
+        );
     }
 
     /**
@@ -150,7 +163,7 @@ abstract contract FVLiquidityOperator is OperatorBase, LiquidityOperator {
         // uint256 _currentExchangeRate = iToken.exchangeRateCurrent();
         // uint256 _actualRepayAmount = _repayAmount.rdivup(_currentExchangeRate);
 
-        IviToken(collateralInfo[providers.at(_index)].vCollateral)
+        IVCollateral(collateralInfo[providers.at(_index)].vCollateral)
             .flashRedeemUnderlying(_amount);
     }
 
@@ -164,17 +177,18 @@ abstract contract FVLiquidityOperator is OperatorBase, LiquidityOperator {
             "executeFlashBorrow: The caller is not the Falsh Vault iToken!"
         );
 
+        // Deposit the flashborrowd amount into the target pool
         address _provider = providers.at(currentProvider - 1);
         _provider.functionDelegateCall(
             abi.encodeWithSignature("deposit(uint256)", _amount)
         );
 
+        // Put the deposit LP token back as collateral
         CollateralInfo storage _collateralInfo = collateralInfo[_provider];
-
-        uint256 _collateralBalance = IvToken(_collateralInfo.collateral)
-            .balanceOf(address(this));
-
-        IviToken(_collateralInfo.vCollateral).mint(
+        uint256 _collateralBalance = IERC20Upgradeable(
+            _collateralInfo.collateral
+        ).balanceOf(address(this));
+        IVCollateral(_collateralInfo.vCollateral).mint(
             address(this),
             _collateralBalance
         );
@@ -188,17 +202,22 @@ abstract contract FVLiquidityOperator is OperatorBase, LiquidityOperator {
      * @param _amount The amount to borrow.
      */
     function executeFlashRepay(uint256 _amount) external {
+        address _provider = providers.at(currentProvider - 1);
+
         require(
-            msg.sender == address(flashVault),
-            "executeFlashRepay: The caller is not the iToken Vault!"
+            msg.sender == (collateralInfo[_provider]).vCollateral,
+            "executeFlashRepay: The caller is not the corresponding vCollateral!"
         );
 
-        providers.at(currentProvider - 1).functionDelegateCall(
+        // Withdraw the flashRedeemed LP from the target pool
+        _provider.functionDelegateCall(
             abi.encodeWithSignature("withdraw(uint256)", _amount)
         );
 
+        // Repay the withdrawn USX back to the flash vault
         uint256 _underlyingBalance = USX.balanceOf(address(this));
-
         flashVault.repayBorrow(_underlyingBalance);
+
+        currentProvider = 0;
     }
 }
