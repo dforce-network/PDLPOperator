@@ -1,5 +1,7 @@
 import { init, finalize } from "./context.js";
 
+const DEBUG = false;
+
 export function getProvider() {
   let provider;
   if (typeof remix == "object") {
@@ -79,5 +81,12 @@ export async function run(task, func) {
 
 export async function sendTransaction(task, target, method, args) {
   console.log(`Going to call ${target}.${method} with args: ${args}`);
-  await task.contracts[target][method](...args);
+
+  if (DEBUG) {
+    console.log(
+      await task.contracts[target].populateTransaction[method](...args)
+    );
+  } else {
+    await task.contracts[target][method](...args);
+  }
 }
