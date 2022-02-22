@@ -89,14 +89,15 @@ abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
     }
 
     /**
-     * @notice Adds a new provider.
+     * @notice Adds a new provider, _addProvider will check against reentrancy
      * @param _provider The provider to add.
      */
     function _addProviderWithVCollateral(
         address _provider,
         IVCollateral _vCollateral
-    ) public onlyOwner nonReentrant {
+    ) public onlyOwner {
         // TODO: check whether _provider and _vCollateral matches
+
         require(
             _vCollateral.controller() == address(controller),
             "VCollateral and flash Vault controller mismatch!"
@@ -119,7 +120,7 @@ abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
     }
 
     /**
-     * @notice Remove a provider.
+     * @notice Remove a provider, _removeProvider will check against reentrancy
      * @param _provider The provider to remove.
      */
     function _removeProvider(address _provider)
@@ -127,7 +128,6 @@ abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
         virtual
         override
         onlyOwner
-        nonReentrant
     {
         LiquidityOperator._removeProvider(_provider);
 
