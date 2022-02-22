@@ -82,6 +82,8 @@ abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
 
         flashVault = _flashVault;
         controller = IControllerFlashVault(_flashVault.controller());
+
+        USX.approve(address(flashVault), uint256(-1));
     }
 
     function _addProvider(address) public virtual override {
@@ -108,6 +110,10 @@ abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
 
         collateralInfo[_provider].vCollateral = address(_vCollateral);
         collateralInfo[_provider].collateral = _vCollateral.underlying();
+
+        // approve to vCollateral
+        IERC20Upgradeable(address(collateralInfo[_provider].collateral))
+            .approve(address(_vCollateral), uint256(-1));
 
         // Enter market for vCollateral
         address[] memory _collaterals = new address[](1);
