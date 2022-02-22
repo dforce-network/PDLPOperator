@@ -41,7 +41,11 @@ interface IControllerFlashVault {
         returns (bool[] memory _results);
 }
 
-abstract contract FVLiquidityOperator is OperatorBase, LiquidityOperator {
+abstract contract Gap {
+    uint256[10] private __gap;
+}
+
+abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
     IFlashVault public flashVault;
 
     IControllerFlashVault public controller;
