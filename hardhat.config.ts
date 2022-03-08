@@ -43,6 +43,11 @@ export default {
       accounts: [`0x${privateKey}`],
       gas: 8000000,
     },
+    tenderly: {
+      url: `https://rpc.tenderly.co/fork/${process.env.TENDERLY_FORK_ID}`,
+      accounts: [`0x${privateKey}`],
+      gas: 8000000,
+    },
   },
   solidity: {
     compilers: [
