@@ -7,6 +7,8 @@ interface IiToken {
     function mint(address _recipient, uint256 _amount) external;
 
     function redeemUnderlying(address _from, uint256 _amount) external;
+
+    function exchangeRateCurrent() external returns (uint256);
 }
 
 abstract contract iTokenProvider is ProviderBase {
@@ -26,5 +28,9 @@ abstract contract iTokenProvider is ProviderBase {
 
     function withdraw(uint256 _amount) external override {
         iToken.redeemUnderlying(address(this), _amount);
+    }
+
+    function exchangeRateCurrent() external override returns (uint256) {
+        return iToken.exchangeRateCurrent();
     }
 }

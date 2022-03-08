@@ -4,6 +4,7 @@ pragma solidity 0.6.12;
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/utils/EnumerableSetUpgradeable.sol";
 
+import "../library/SafeRatioMath.sol";
 import "./VaultBase.sol";
 import "./LiquidityOperator.sol";
 
@@ -46,6 +47,8 @@ abstract contract Gap {
 }
 
 abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
+    using SafeRatioMath for uint256;
+
     IFlashVault public flashVault;
 
     IControllerFlashVault public controller;
@@ -119,6 +122,7 @@ abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
         address[] memory _collaterals = new address[](1);
         _collaterals[0] = address(_vCollateral);
         bool[] memory _results = controller.enterMarkets(_collaterals);
+        // enterMarkets will return true if it succeeds
         require(
             _results[0],
             "_addProviderWithVCollateral: Fail to enter market!"
@@ -174,12 +178,13 @@ abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
 
         currentProvider = uint8(_index + 1);
 
-        // TODO: calculate exchange rate in provider
-        // uint256 _currentExchangeRate = iToken.exchangeRateCurrent();
-        // uint256 _actualRepayAmount = _repayAmount.rdivup(_currentExchangeRate);
+        // calculate the LP amount should be redeemed
+        uint256 _currentExchangeRate = IProvider(providers.at(_index))
+            .exchangeRateCurrent();
+        uint256 _redeemAmount = _amount.rdivup(_currentExchangeRate);
 
         IVCollateral(collateralInfo[providers.at(_index)].vCollateral)
-            .flashRedeemUnderlying(_amount);
+            .flashRedeemUnderlying(_redeemAmount);
     }
 
     /**
@@ -203,6 +208,7 @@ abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
         uint256 _collateralBalance = IERC20Upgradeable(
             _collateralInfo.collateral
         ).balanceOf(address(this));
+
         IVCollateral(_collateralInfo.vCollateral).mint(
             address(this),
             _collateralBalance

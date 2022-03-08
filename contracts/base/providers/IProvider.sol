@@ -16,4 +16,6 @@ interface IProvider {
     function deposit(uint256 amount) external;
 
     function withdraw(uint256 amount) external;
+
+    function exchangeRateCurrent() external returns (uint256);
 }
