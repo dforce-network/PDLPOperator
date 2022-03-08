@@ -1,0 +1,4 @@
+[submodule "lending"]
+	path = lending
+	url = git@github.com:dforce-network/LendingContracts.git
+	branch = dev
