@@ -1,6 +1,12 @@
 import { init, finalize } from "./context.js";
 
-let onlyPrint = false;
+const SEND = 0;
+const PRINT = 1;
+const PRINT_TENDERLY = 2;
+
+let sendOption = 0;
+
+let tenderlyID, tenderlyFrom;
 
 export function getProvider() {
   let provider;
@@ -82,16 +88,44 @@ export async function run(task, func) {
 export async function sendTransaction(task, target, method, args) {
   console.log(`Going to call ${target}.${method} with args: ${args}`);
 
-  if (onlyPrint) {
-    console.log(
-      "Transaction data:",
-      await task.contracts[target].populateTransaction[method](...args)
-    );
-  } else {
+  if (sendOption === SEND) {
     await task.contracts[target][method](...args);
+  } else {
+    const data = await task.contracts[target].populateTransaction[method](
+      ...args
+    );
+
+    if (sendOption === PRINT) {
+      console.log(`Transaction data:`, data);
+    } else {
+      printTenderly(data, tenderlyID, tenderlyFrom, task.chainId);
+    }
   }
 }
 
 export function printTransactionInsteadOfSend() {
-  onlyPrint = true;
+  sendOption = PRINT;
+}
+
+export function printTenderlyInsteadOfSend(id, from) {
+  sendOption = PRINT_TENDERLY;
+
+  tenderlyID = id;
+  tenderlyFrom = from;
+}
+
+function printTenderly(data, id, from, chainId) {
+  const url =
+    "https://dashboard.tenderly.co/SnowJi/project/fork/" +
+    id +
+    "/simulation/new?parentId=&from=" +
+    from +
+    "&gas=8000000&gasPrice=0&value=0&contractAddress=" +
+    data.to +
+    "&rawFunctionInput=" +
+    data.data +
+    "&network=" +
+    chainId;
+
+  console.log(`Tenderly URL: ${url}`);
 }
