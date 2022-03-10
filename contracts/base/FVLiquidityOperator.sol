@@ -220,7 +220,7 @@ abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
     /**
      * @notice The callback function of `flashRedeemUnderlying`
      *  withdraw the flashRedeemed amount from the target pool and repay back to the flashVault
-     * @param _amount The amount to borrow.
+     * @param _amount The amount to repay.
      */
     function executeFlashRepay(uint256 _amount) external {
         address _provider = providers.at(currentProvider - 1);
@@ -231,8 +231,12 @@ abstract contract FVLiquidityOperator is OperatorBase, Gap, LiquidityOperator {
         );
 
         // Withdraw the flashRedeemed LP from the target pool
+        // Multiply the current exchange rate as `withdraw` calls `redeemUnderlying`
         _provider.functionDelegateCall(
-            abi.encodeWithSignature("withdraw(uint256)", _amount)
+            abi.encodeWithSignature(
+                "withdraw(uint256)",
+                _amount.rmul(IProvider(_provider).exchangeRateCurrent())
+            )
         );
 
         // Repay the withdrawn USX back to the flash vault
