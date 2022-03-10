@@ -2,6 +2,7 @@ import {
   run,
   sendTransaction,
   printTransactionInsteadOfSend,
+  printTenderlyInsteadOfSend,
 } from "./helpers/utils.js";
 import { deployContracts } from "./helpers/deploy.js";
 import { printArgs } from "./helpers/timelock.js";
@@ -255,12 +256,25 @@ async function deployNewOperator() {
 }
 
 async function upgrade() {
-  printTransactionInsteadOfSend();
+  // printTransactionInsteadOfSend();
+  printTenderlyInsteadOfSend(
+    "07be47ab-60eb-4cce-9ffb-364debca4f61", //id
+    "0x4006e4a788edff483b5a0c90ca9af9c0a497072b" // from
+  );
 
   // await run(task, upgradeBSCOperator);
   // await run(task, addProviders);
 
-  // await run(task, addOperatorToFlashVaultQUSX);
+  printTenderlyInsteadOfSend(
+    "07be47ab-60eb-4cce-9ffb-364debca4f61", //id
+    "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75" // from
+  );
+  await run(task, addOperatorToFlashVaultQUSX);
+
+  printTenderlyInsteadOfSend(
+    "07be47ab-60eb-4cce-9ffb-364debca4f61", //id
+    "0x4006e4a788edff483b5a0c90ca9af9c0a497072b" // from
+  );
   await run(task, depositTest);
   await run(task, withdrawTest);
 }
