@@ -1,4 +1,8 @@
-import { run, sendTransaction } from "./helpers/utils.js";
+import {
+  run,
+  sendTransaction,
+  printTransactionInsteadOfSend,
+} from "./helpers/utils.js";
 import { deployContracts } from "./helpers/deploy.js";
 import { printArgs } from "./helpers/timelock.js";
 import { attachContractAtAdddress } from "./helpers/contract";
@@ -50,6 +54,18 @@ async function deploy() {
         deployments.pdlpMiniMinter.address,
         CBRIDGE,
       ],
+    },
+    dForceLendingProvider: {
+      contract: "dForceLendingProvider",
+      path: "contracts/base/providers/",
+      useProxy: false,
+      getArgs: () => [iUSX],
+    },
+    liqeeProvider: {
+      contract: "LiqeeProvider",
+      path: "contracts/base/providers/",
+      useProxy: false,
+      getArgs: () => [qUSX],
     },
   };
 
@@ -129,23 +145,29 @@ async function upgradeBSCOperator() {
 
   await deployContracts(task);
 
-  // Direct sendTransaction if no Timelock
-  // await sendTransaction(task, "proxyAdmin", "upgrade", [
-  //   task.deployments.BSCOperator.address,
-  //   task.deployments.BSCOperatorImpl.address,
-  // ]);
-
-  // print data if use Timelock
-  await printArgs(task, [
-    [
-      "proxyAdmin",
-      "upgrade",
+  // Check the proxyAdmin's owner is the Timelock
+  if (
+    (await task.contracts.proxyAdmin.owner()) ===
+    task.contracts.timeLock.address
+  ) {
+    // print data if use Timelock
+    await printArgs(task, [
       [
-        task.deployments.bscOperator.address,
-        task.deployments.BSCOperatorImpl.address,
+        "proxyAdmin",
+        "upgrade",
+        [
+          task.deployments.bscOperator.address,
+          task.deployments.BSCOperatorImpl.address,
+        ],
       ],
-    ],
-  ]);
+    ]);
+  } else {
+    // Direct sendTransaction if no Timelock
+    await sendTransaction(task, "proxyAdmin", "upgrade", [
+      task.deployments.bscOperator.address,
+      task.deployments.BSCOperatorImpl.address,
+    ]);
+  }
 
   // Call upgrade()
   await sendTransaction(task, "bscOperator", "upgrade", [
@@ -172,38 +194,76 @@ async function addProviders() {
   ]);
 }
 
+async function addOperatorToFlashVaultQUSX() {
+  await sendTransaction(task, "vqUSX", "_addToWhitelists", [
+    task.contracts.bscOperator.address,
+  ]);
+}
+
+async function getName(contractAddr) {
+  const provider = await attachContractAtAdddress(
+    task.signer,
+    contractAddr,
+    "iTokenProvider",
+    "contracts/base/providers/"
+  );
+
+  return provider.name();
+}
+
 async function depositTest() {
   const providers = await task.contracts.bscOperator.getProviders();
 
   let index = 0;
   for (const providerAddress of providers) {
-    const provider = await attachContractAtAdddress(
-      task.signer,
-      providerAddress,
-      "iTokenProvider",
-      "contracts/base/providers/"
-    );
-    console.log("Going to deposit to", await provider.name());
+    console.log("Going to deposit to", await getName(providerAddress));
 
     await sendTransaction(task, "bscOperator", "deposit", [
       index,
-      ethers.utils.parseEther("10000000"),
+      ethers.utils.parseEther("100000"),
     ]);
 
     index++;
   }
 }
 
-async function main() {
-  // await run(task, deploy);
-  // await run(task, setOwner);
-  // await run(task, addUSXMinter);
-  // await run(task, depositToL2);
-  // await run(task, addToWhitelists);
+async function withdrawTest() {
+  const providers = await task.contracts.bscOperator.getProviders();
 
-  await run(task, upgradeBSCOperator);
-  await run(task, addProviders);
-  // await run(task, depositTest);
+  let index = 0;
+  for (const providerAddress of providers) {
+    console.log("Going to withdraw from", await getName(providerAddress));
+
+    await sendTransaction(task, "bscOperator", "withdraw", [
+      index,
+      ethers.utils.parseEther("100000"),
+    ]);
+
+    index++;
+  }
 }
 
-main();
+async function deployNewOperator() {
+  await run(task, deploy);
+  await run(task, setOwner);
+  await run(task, addUSXMinter);
+  await run(task, addToWhitelists);
+  await run(task, addProviders);
+
+  // await run(task, depositTest);
+  // await run(task, withdrawTest);
+}
+
+async function upgrade() {
+  printTransactionInsteadOfSend();
+
+  // await run(task, upgradeBSCOperator);
+  // await run(task, addProviders);
+
+  // await run(task, addOperatorToFlashVaultQUSX);
+  await run(task, depositTest);
+  await run(task, withdrawTest);
+}
+
+// deployNewOperator();
+upgrade();

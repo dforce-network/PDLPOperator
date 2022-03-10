@@ -1,6 +1,6 @@
 import { init, finalize } from "./context.js";
 
-const DEBUG = false;
+let onlyPrint = false;
 
 export function getProvider() {
   let provider;
@@ -82,11 +82,16 @@ export async function run(task, func) {
 export async function sendTransaction(task, target, method, args) {
   console.log(`Going to call ${target}.${method} with args: ${args}`);
 
-  if (DEBUG) {
+  if (onlyPrint) {
     console.log(
+      "Transaction data:",
       await task.contracts[target].populateTransaction[method](...args)
     );
   } else {
     await task.contracts[target][method](...args);
   }
+}
+
+export function printTransactionInsteadOfSend() {
+  onlyPrint = true;
 }
