@@ -116,7 +116,7 @@ export function printTenderlyInsteadOfSend(id, from) {
 
 function printTenderly(data, id, from, chainId) {
   const url =
-    "https://dashboard.tenderly.co/SnowJi/project/fork/" +
+    "\nhttps://dashboard.tenderly.co/SnowJi/project/fork/" +
     id +
     "/simulation/new?parentId=&from=" +
     from +
@@ -125,7 +125,8 @@ function printTenderly(data, id, from, chainId) {
     "&rawFunctionInput=" +
     data.data +
     "&network=" +
-    chainId;
+    chainId +
+    "\n";
 
   console.log(`Tenderly URL: ${url}`);
 }
