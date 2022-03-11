@@ -3,6 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import "dotenv/config";
 // import "hardhat-contract-sizer";
 // import "solidity-coverage";
+import "hardhat-storage-layout";
 
 const privateKey = process.env.PRIVATE_KEY;
 const infuraKey = process.env.INFURA_KEY;
@@ -51,6 +52,11 @@ export default {
           optimizer: {
             enabled: true,
             runs: 200,
+          },
+          outputSelection: {
+            "*": {
+              "*": ["storageLayout"],
+            },
           },
         },
       },
