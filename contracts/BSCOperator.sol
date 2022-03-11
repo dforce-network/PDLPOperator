@@ -38,6 +38,12 @@ contract BSCOperator is OperatorBase, FVLiquidityOperator, CBridgeOperator {
         IVault _vault,
         IcBridge _cBridge
     ) external onlyOwner {
+        // Initialize the providers storages
+        assembly {
+            sstore(105, 0)
+            sstore(106, 0)
+        }
+
         __OperatorBase_init_unchained(_usx);
         __FVLiquidityOperator_init_unchained(_flashVault);
 
