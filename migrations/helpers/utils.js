@@ -103,6 +103,10 @@ export async function sendTransaction(task, target, method, args) {
   }
 }
 
+export function sendTransactionInsteadOfPrint() {
+  sendOption = SEND;
+}
+
 export function printTransactionInsteadOfSend() {
   sendOption = PRINT;
 }
