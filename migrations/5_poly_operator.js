@@ -121,6 +121,12 @@ async function getName(contractAddr) {
   return provider.name();
 }
 
+async function depositToCBridge() {
+  await sendTransaction(task, "polyOperator", "depositToCBridge", [
+    ethers.utils.parseEther("100000"),
+  ]);
+}
+
 async function depositTest() {
   const providers = await task.contracts.polyOperator.getProviders();
 
@@ -154,11 +160,6 @@ async function withdrawTest() {
 }
 
 async function polyOperator() {
-  //   printTenderlyInsteadOfSend(
-  //     TENDERLY_FORK_ID,
-  //     "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75" // from
-  //   );
-
   // The flash vault should be deployed first
   await run(task, deploy);
   await run(task, setOwner);
@@ -166,6 +167,7 @@ async function polyOperator() {
 
   await run(task, depositTest);
   await run(task, withdrawTest);
+  await run(task, depositToCBridge);
 }
 
 polyOperator();
