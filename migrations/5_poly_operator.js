@@ -20,8 +20,8 @@ const network = {
 let deployInfo = {
   polygon: {
     MSD_CONTROLLER: "0x40BE37096ce3b8A2E9eC002468Ab91071501C499",
-    USX: "0xB5102CeE1528Ce2C760893034A4603663495fD72",
-    iUSX: "0x7B933e1c1F44bE9Fb111d87501bAADA7C8518aBe",
+    USX: "0xCf66EB3D546F0415b368d98A95EAF56DeD7aA752",
+    iUSX: "0xc171EBE1A2873F042F1dDdd9327D00527CA29882",
     viUSX: "0x038362bd36AA7Baf45aC5b3EE75b784C2Fed8e86",
     // VMUSX
     FLASH_VAULT: "0x263d04d9aF1f31302322d6a7F77b4ddcb6B5097C",
@@ -36,6 +36,7 @@ let deployInfo = {
 async function deploy() {
   const info = deployInfo[network[task.chainId]];
   const USX = info.USX;
+  const iUSX = info.iUSX;
   const MSD_CONTROLLER = info.MSD_CONTROLLER;
   const FLASH_VAULT = info.FLASH_VAULT;
   const CBRIDGE = info.CBRIDGE;
@@ -109,6 +110,17 @@ async function addProviders() {
   ]);
 }
 
+async function getName(contractAddr) {
+  const provider = await attachContractAtAdddress(
+    task.signer,
+    contractAddr,
+    "iTokenProvider",
+    "contracts/base/providers/"
+  );
+
+  return provider.name();
+}
+
 async function depositTest() {
   const providers = await task.contracts.polyOperator.getProviders();
 
@@ -142,19 +154,18 @@ async function withdrawTest() {
 }
 
 async function polyOperator() {
-  printTenderlyInsteadOfSend(
-    TENDERLY_FORK_ID,
-    "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75" // from
-  );
+  //   printTenderlyInsteadOfSend(
+  //     TENDERLY_FORK_ID,
+  //     "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75" // from
+  //   );
 
   // The flash vault should be deployed first
   await run(task, deploy);
   await run(task, setOwner);
-  await run(task, addUSXMinter);
   await run(task, addProviders);
 
-  // await run(task, depositTest);
-  // await run(task, withdrawTest);
+  await run(task, depositTest);
+  await run(task, withdrawTest);
 }
 
 polyOperator();
