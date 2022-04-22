@@ -3,5 +3,18 @@
     "contract": "ProxyAdmin",
     "path": "contracts/library/",
     "address": "0x1C4d5eCFBf2AF57251f20a524D0f0c1b4f6ED1C9"
+  },
+  "OpOperatorImpl": {
+    "contract": "OpOperator",
+    "address": "0x15962427A9795005c640A6BF7f99c2BA1531aD6d"
+  },
+  "opOperator": {
+    "contract": "OpOperator",
+    "address": "0x70a35414FaD53752C9352401BE211779EC413BD4"
+  },
+  "dForceLendingProvider": {
+    "contract": "dForceLendingProvider",
+    "path": "contracts/base/providers/",
+    "address": "0x5385bCC7420012BaBd14675A466e24FBE2f9b1D6"
   }
 }

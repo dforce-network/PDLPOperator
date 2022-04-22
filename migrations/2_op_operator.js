@@ -15,8 +15,8 @@ let deployInfo = {
     USX: "0xbfD291DA8A403DAAF7e5E9DC1ec0aCEaCd4848B9",
     iUSX: "0x7e7e1d8757b241Aa6791c089314604027544Ce43",
     // FLASH_VAULT
-    vUSX: "",
-    viUSX: "",
+    vUSX: "0x3EA2c9daa2aB26dbc0852ea653f99110c335f10a",
+    viUSX: "0xA6a9EA5421ED356eC62fA4767A3745C5419aEbEC",
     cBridge: "0x9D39Fc627A6d9d9F8C831c16995b209548cc3401",
     opBridge: "0xc76cbFbAfD41761279E3EDb23Fd831Ccb74D5D67",
     WHITE_LIST: "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75",
@@ -33,6 +33,7 @@ let deployInfo = {
 async function deploy() {
   const info = deployInfo[network[task.chainId]];
   const USX = info.USX;
+  const iUSX = info.iUSX;
   const vUSX = info.vUSX;
   const cBridge = info.cBridge;
   const opBridge = info.opBridge;

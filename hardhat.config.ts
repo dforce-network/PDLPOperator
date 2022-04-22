@@ -31,6 +31,10 @@ export default {
       //   url: "https://arb-mainnet.g.alchemy.com/v2/" + alchemyKey,
       // },
     },
+    'truffle-dashboard': {
+      url: "http://localhost:24012/rpc",
+      timeout: 200000,
+    },
     kovan: {
       url: `https://kovan.infura.io/v3/${infuraKey}`,
       accounts: [`0x${privateKey}`],
