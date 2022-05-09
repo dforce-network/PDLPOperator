@@ -29,5 +29,18 @@
     "contract": "dForceLendingProvider",
     "path": "contracts/base/providers/",
     "address": "0xA11583480D6A5Ee1cc2D47676916eC165C70426E"
+  },
+  "pdlpMiniMinterEUX": {
+    "contract": "MiniMinter",
+    "address": "0xB7e0B3e00fb13EcCf70907bC5B626f4f88f1fD85"
+  },
+  "polyOperatorEUX": {
+    "contract": "PolyOperator",
+    "address": "0xC9d1cbc45dd3e86E98067B7eb279C13F7B77C627"
+  },
+  "dForceLendingProviderEUX": {
+    "contract": "dForceLendingProvider",
+    "path": "contracts/base/providers/",
+    "address": "0x40F8417d3c98847Eb553785b607EDD64F90A213A"
   }
 }
