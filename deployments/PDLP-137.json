@@ -13,7 +13,7 @@
     "contract": "MiniMinter",
     "address": "0xa7C262Ce5C812C30236adBda491d048fE5edF673"
   },
-  "pdlpMiniMinter": {
+  "pdlpMiniMinterUSX": {
     "contract": "MiniMinter",
     "address": "0xc617076c27c418a3A2C593009A607A68aD178E78"
   },
@@ -21,11 +21,11 @@
     "contract": "PolyOperator",
     "address": "0x0A6941Ef5578FdE91db5C84561eE4B4aE5C20cdd"
   },
-  "polyOperator": {
+  "polyOperatorUSX": {
     "contract": "PolyOperator",
     "address": "0x99E8352D079326Bc431633a61954F713AafE372C"
   },
-  "dForceLendingProvider": {
+  "dForceLendingProviderUSX": {
     "contract": "dForceLendingProvider",
     "path": "contracts/base/providers/",
     "address": "0xA11583480D6A5Ee1cc2D47676916eC165C70426E"
