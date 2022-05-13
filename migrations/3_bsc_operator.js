@@ -24,8 +24,10 @@ let deployInfo = {
       USX: {
         ADDR: "0xB5102CeE1528Ce2C760893034A4603663495fD72",
         iToken: "0x7B933e1c1F44bE9Fb111d87501bAADA7C8518aBe",
+        qToken: "0x450E09a303AA4bcc518b5F74Dd00433bd9555A77",
         viToken: "0x206d2D5218c8Eed85Ee0f0FE9BfDad03025BC72E",
         vMToken: "0x3de52B6340Cc138f811b5e752cA56042BDDA2812",
+        vqToken: "0xeF535decdCA4B72608ff82A692864E1A4ccd50e5",
         CBRIDGE: "0xdd90E5E87A2081Dcf0391920868eBc2FFB81a1aF",
       },
       EUX: {
@@ -66,9 +68,9 @@ async function deploy(msd) {
     useProxy: false,
     getArgs: () => [MSD.iToken],
   };
-  if (msd.hasOwnProperty("qToken")) {
+  if (MSD.hasOwnProperty("qToken")) {
     task.contractsToDeploy["liqeeProvider" + msd] = {
-      contract: "liqeeProvider",
+      contract: "LiqeeProvider",
       path: "contracts/base/providers/",
       useProxy: false,
       getArgs: () => [MSD.qToken],
@@ -147,7 +149,7 @@ async function addProviders(msd) {
       task,
       "bscOperator" + msd,
       "_addProviderWithVCollateral",
-      [task.deployments["liqeeProvider" + msd].address, info.MSDs[msd].qToken]
+      [task.deployments["liqeeProvider" + msd].address, info.MSDs[msd].vqToken]
     );
   }
 }
@@ -219,14 +221,14 @@ async function bscOperator(msd) {
 }
 
 async function bscOperatorUpgrade(msd) {
-  // printTenderlyInsteadOfSend(
-  //   TENDERLY_FORK_ID,
-  //   "0x8C3984Fb0F649c304D68DB69457DBF137D156D7a" // from
-  // );
+  printTenderlyInsteadOfSend(
+    TENDERLY_FORK_ID,
+    "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75" // from
+  );
 
-  await deploy(msd);
-  await upgradeBSCOperator(msd);
-  await addProviders(msd);
+  // await deploy(msd);
+  // await upgradeBSCOperator(msd);
+  // await addProviders(msd);
 
   await depositTest(msd);
   await withdrawTest(msd);
@@ -234,9 +236,9 @@ async function bscOperatorUpgrade(msd) {
 }
 
 async function main() {
-  await bscOperator("EUX");
+  // await bscOperator("EUX");
 
-  // await bscOperatorUpgrade("USX");
+  await bscOperatorUpgrade("USX");
 }
 
 run(task, main);
