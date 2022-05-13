@@ -46,5 +46,15 @@
     "contract": "dForceLendingProvider",
     "path": "contracts/base/providers/",
     "address": "0x46E803f7B22031717E5450A2A690D9aA42233cbd"
+  },
+  "dForceLendingProviderUSX": {
+    "contract": "dForceLendingProvider",
+    "path": "contracts/base/providers/",
+    "address": "0x129247cA5535c0915f703975E34D69d3F62968fc"
+  },
+  "liqeeProviderUSX": {
+    "contract": "LiqeeProvider",
+    "path": "contracts/base/providers/",
+    "address": "0xDc5903d7dda1aeF368E6254e15e8CcEf30FeF897"
   }
 }
