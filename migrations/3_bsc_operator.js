@@ -8,6 +8,8 @@ import { deployContracts } from "./helpers/deploy.js";
 import { printArgs } from "./helpers/timelock.js";
 import { attachContractAtAdddress } from "./helpers/contract";
 
+const TENDERLY_FORK_ID = "0868fa5a-7403-4e8f-a094-ba32fb837e08";
+
 let task = { name: "PDLP" };
 
 const network = {
@@ -16,135 +18,84 @@ const network = {
 
 let deployInfo = {
   bsc: {
-    DF: "0x4A9A2b2b04549C3927dd2c9668A5eF3fCA473623",
-    USX: "0xB5102CeE1528Ce2C760893034A4603663495fD72",
-    iUSX: "0x7B933e1c1F44bE9Fb111d87501bAADA7C8518aBe",
-    viUSX: "0x206d2D5218c8Eed85Ee0f0FE9BfDad03025BC72E",
-    qUSX: "0x450E09a303AA4bcc518b5F74Dd00433bd9555A77",
-    vqUSX: "0xeF535decdCA4B72608ff82A692864E1A4ccd50e5",
-    // VMUSX
-    FLASH_VAULT: "0x3de52B6340Cc138f811b5e752cA56042BDDA2812",
-    CBRIDGE: "0xdd90E5E87A2081Dcf0391920868eBc2FFB81a1aF",
-    CBRIGE_CAP: ethers.utils.parseEther("100000000"),
-    // Mint cap for miniminter for cbridge
-    MINT_CAP: ethers.utils.parseEther("100000000"),
+    MSD_CONTROLLER: "0x4601d9c8def18c101496dec0a4864e8751295bee",
+    WHITE_LIST: "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75",
+    MSDs: {
+      USX: {
+        ADDR: "0xB5102CeE1528Ce2C760893034A4603663495fD72",
+        iToken: "0x7B933e1c1F44bE9Fb111d87501bAADA7C8518aBe",
+        viToken: "0x206d2D5218c8Eed85Ee0f0FE9BfDad03025BC72E",
+        vMToken: "0x3de52B6340Cc138f811b5e752cA56042BDDA2812",
+        CBRIDGE: "0xdd90E5E87A2081Dcf0391920868eBc2FFB81a1aF",
+      },
+      EUX: {
+        ADDR: "0x367c17D19fCd0f7746764455497D63c8e8b2BbA3",
+        iToken: "0x983A727Aa3491AB251780A13acb5e876D3f2B1d8",
+        viToken: "0xD86E43f400e65d1e68fE1eea409799506C51652F",
+        vMToken: "0xE189e9585b392624c343b750632C00b452022d53",
+        CBRIDGE: "0xdd90E5E87A2081Dcf0391920868eBc2FFB81a1aF",
+      },
+    },
   },
 };
 
-async function deploy() {
+async function deploy(msd) {
   const info = deployInfo[network[task.chainId]];
-  const USX = info.USX;
+  const MSD = info.MSDs[msd];
   const MSD_CONTROLLER = info.MSD_CONTROLLER;
-  const FLASH_VAULT = info.FLASH_VAULT;
-  const CBRIDGE = info.CBRIDGE;
 
-  task.contractsToDeploy = {
-    pdlpMiniMinter: {
-      contract: "MiniMinter",
-      path: "contracts/msd/",
-      useProxy: true,
-      getArgs: () => [USX, MSD_CONTROLLER],
-    },
-    bscOperator: {
-      contract: "BSCOperator",
-      path: "contracts/operator/",
-      useProxy: true,
-      getArgs: (deployments) => [
-        USX,
-        FLASH_VAULT,
-        deployments.pdlpMiniMinter.address,
-        CBRIDGE,
-      ],
-    },
-    dForceLendingProvider: {
-      contract: "dForceLendingProvider",
-      path: "contracts/base/providers/",
-      useProxy: false,
-      getArgs: () => [iUSX],
-    },
-    liqeeProvider: {
-      contract: "LiqeeProvider",
-      path: "contracts/base/providers/",
-      useProxy: false,
-      getArgs: () => [qUSX],
-    },
+  task.contractsToDeploy = {};
+  task.contractsToDeploy["pdlpMiniMinter" + msd] = {
+    contract: "MiniMinter",
+    useProxy: true,
+    getArgs: () => [MSD.ADDR, MSD_CONTROLLER],
   };
-
-  await deployContracts(task);
-}
-
-async function setOwner() {
-  await sendTransaction(task, "pdlpMiniMinter", "_setPendingOwner", [
-    task.deployments.bscOperator.address,
-  ]);
-
-  await sendTransaction(task, "bscOperator", "acceptOwner", []);
-
-  await sendTransaction(task, "bscOperator", "_addToWhitelists", [
-    task.signerAddr,
-  ]);
-}
-
-async function addUSXMinter() {
-  const info = deployInfo[network[task.chainId]];
-  const USX = info.USX;
-  const MINT_CAP = info.MINT_CAP;
-
-  const transactions = [
-    [
-      "msdController",
-      "_addMinters",
-      [USX, [task.deployments.pdlpMiniMinter.address], [MINT_CAP]],
+  task.contractsToDeploy["bscOperator" + msd] = {
+    contract: "BSCOperator",
+    path: "contracts/operator/",
+    useProxy: true,
+    getArgs: (deployments) => [
+      MSD.ADDR,
+      MSD.vMToken,
+      deployments["pdlpMiniMinter" + msd].address,
+      MSD.CBRIDGE,
     ],
-  ];
+  };
+  task.contractsToDeploy["dForceLendingProvider" + msd] = {
+    contract: "dForceLendingProvider",
+    path: "contracts/base/providers/",
+    useProxy: false,
+    getArgs: () => [MSD.iToken],
+  };
+  if (msd.hasOwnProperty("qToken")) {
+    task.contractsToDeploy["liqeeProvider" + msd] = {
+      contract: "liqeeProvider",
+      path: "contracts/base/providers/",
+      useProxy: false,
+      getArgs: () => [MSD.qToken],
+    };
+  }
 
-  // await sendTransaction(task, ...transactions[0]);
-  await printArgs(task, transactions);
+  await deployContracts(task);
 }
 
-async function addToWhitelists() {
-  console.log("Owner: ", await task.contracts.bscOperator.owner());
+async function setOwner(msd) {
+  const info = deployInfo[network[task.chainId]];
 
-  await sendTransaction(task, "bscOperator", "_addToWhitelists", [
-    "0xbA32Bc6396152025608a37005D80E0346aB4740b",
+  await sendTransaction(task, "pdlpMiniMinter" + msd, "_setPendingOwner", [
+    task.deployments["bscOperator" + msd].address,
+  ]);
+
+  await sendTransaction(task, "bscOperator" + msd, "acceptOwner", []);
+
+  await sendTransaction(task, "bscOperator" + msd, "_addToWhitelists", [
+    info.WHITE_LIST,
   ]);
 }
 
-async function upgradeBSCOperator() {
+async function upgradeBSCOperator(msd) {
   const info = deployInfo[network[task.chainId]];
-  const USX = info.USX;
-  const CBRIDGE = info.CBRIDGE;
-  const FLASH_VAULT = info.FLASH_VAULT;
-
-  const iUSX = info.iUSX;
-  const qUSX = info.qUSX;
-
-  task.contractsToDeploy = {
-    dForceLendingProvider: {
-      contract: "dForceLendingProvider",
-      path: "contracts/base/providers/",
-      useProxy: false,
-      getArgs: () => [iUSX],
-    },
-    liqeeProvider: {
-      contract: "LiqeeProvider",
-      path: "contracts/base/providers/",
-      useProxy: false,
-      getArgs: () => [qUSX],
-    },
-    BSCOperatorImpl: {
-      contract: "BSCOperator",
-      useProxy: false,
-      getArgs: (deployments) => [
-        USX,
-        FLASH_VAULT,
-        deployments.pdlpMiniMinter.address,
-        CBRIDGE,
-      ],
-    },
-  };
-
-  await deployContracts(task);
+  const MSD = info.MSDs[msd];
 
   // Check the proxyAdmin's owner is the Timelock
   if (
@@ -157,7 +108,7 @@ async function upgradeBSCOperator() {
         "proxyAdmin",
         "upgrade",
         [
-          task.deployments.bscOperator.address,
+          task.deployments["bscOperator" + msd].address,
           task.deployments.BSCOperatorImpl.address,
         ],
       ],
@@ -165,40 +116,41 @@ async function upgradeBSCOperator() {
   } else {
     // Direct sendTransaction if no Timelock
     await sendTransaction(task, "proxyAdmin", "upgrade", [
-      task.deployments.bscOperator.address,
+      task.deployments["bscOperator" + msd].address,
       task.deployments.BSCOperatorImpl.address,
     ]);
   }
 
   // Call upgrade()
-  await sendTransaction(task, "bscOperator", "upgrade", [
-    USX,
-    FLASH_VAULT,
-    task.deployments.pdlpMiniMinter.address,
-    CBRIDGE,
+  await sendTransaction(task, ["bscOperator" + msd], "upgrade", [
+    MSD.ADDR,
+    MSD.vMToken,
+    task.deployments["pdlpMiniMinter" + msd].address,
+    MSD.CBRIDGE,
   ]);
 }
 
-async function addProviders() {
+async function addProviders(msd) {
   const info = deployInfo[network[task.chainId]];
-  const viUSX = info.viUSX;
-  const vqUSX = info.vqUSX;
 
-  await sendTransaction(task, "bscOperator", "_addProviderWithVCollateral", [
-    task.deployments.dForceLendingProvider.address,
-    viUSX,
-  ]);
+  await sendTransaction(
+    task,
+    "bscOperator" + msd,
+    "_addProviderWithVCollateral",
+    [
+      task.deployments["dForceLendingProvider" + msd].address,
+      info.MSDs[msd].viToken,
+    ]
+  );
 
-  await sendTransaction(task, "bscOperator", "_addProviderWithVCollateral", [
-    task.deployments.liqeeProvider.address,
-    vqUSX,
-  ]);
-}
-
-async function addOperatorToFlashVaultQUSX() {
-  await sendTransaction(task, "vqUSX", "_addToWhitelists", [
-    task.contracts.bscOperator.address,
-  ]);
+  if (info.MSDs[msd].hasOwnProperty("qToken")) {
+    await sendTransaction(
+      task,
+      "bscOperator" + msd,
+      "_addProviderWithVCollateral",
+      [task.deployments["liqeeProvider" + msd].address, info.MSDs[msd].qToken]
+    );
+  }
 }
 
 async function getName(contractAddr) {
@@ -212,14 +164,14 @@ async function getName(contractAddr) {
   return provider.name();
 }
 
-async function depositTest() {
-  const providers = await task.contracts.bscOperator.getProviders();
+async function depositTest(msd) {
+  const providers = await task.contracts["bscOperator" + msd].getProviders();
 
   let index = 0;
   for (const providerAddress of providers) {
     console.log("Going to deposit to", await getName(providerAddress));
 
-    await sendTransaction(task, "bscOperator", "deposit", [
+    await sendTransaction(task, "bscOperator" + msd, "deposit", [
       index,
       ethers.utils.parseEther("100000"),
     ]);
@@ -228,14 +180,14 @@ async function depositTest() {
   }
 }
 
-async function withdrawTest() {
-  const providers = await task.contracts.bscOperator.getProviders();
+async function withdrawTest(msd) {
+  const providers = await task.contracts["bscOperator" + msd].getProviders();
 
   let index = 0;
   for (const providerAddress of providers) {
     console.log("Going to withdraw from", await getName(providerAddress));
 
-    await sendTransaction(task, "bscOperator", "withdraw", [
+    await sendTransaction(task, "bscOperator" + msd, "withdraw", [
       index,
       ethers.utils.parseEther("100000"),
     ]);
@@ -244,42 +196,48 @@ async function withdrawTest() {
   }
 }
 
-async function deployNewOperator() {
-  await run(task, deploy);
-  await run(task, setOwner);
-  await run(task, addUSXMinter);
-  await run(task, addToWhitelists);
-  await run(task, addProviders);
-
-  // await run(task, depositTest);
-  // await run(task, withdrawTest);
+async function depositToCBridge(msd) {
+  await sendTransaction(task, "bscOperator" + msd, "depositToCBridge", [
+    ethers.utils.parseEther("100000"),
+  ]);
 }
 
-async function upgrade() {
-  const TENDERLY_FORK_ID = "aa5489d5-2a05-4c0f-9335-e8bd9e27ec0e";
-
-  // printTransactionInsteadOfSend();
+async function bscOperator(msd) {
   // printTenderlyInsteadOfSend(
   //   TENDERLY_FORK_ID,
-  //   "0x4006e4a788edff483b5a0c90ca9af9c0a497072b" // from
+  //   "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75"
   // );
 
-  // await run(task, upgradeBSCOperator);
-  // await run(task, addProviders);
+  // The flash vault should be deployed first
+  await deploy(msd);
+  await setOwner(msd);
+  await addProviders(msd);
 
-  // printTenderlyInsteadOfSend(
-  //   TENDERLY_FORK_ID,
-  //   "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75" // from
-  // );
-  // await run(task, addOperatorToFlashVaultQUSX);
+  // After minter and whitelist is set, we can deposit
+  // await depositTest(msd);
+  // await withdrawTest(msd);
+  // await depositToCBridge(msd);
+}
 
+async function bscOperatorUpgrade(msd) {
   printTenderlyInsteadOfSend(
     TENDERLY_FORK_ID,
-    "0x4006e4a788edff483b5a0c90ca9af9c0a497072b" // from
+    "0x8C3984Fb0F649c304D68DB69457DBF137D156D7a" // from
   );
-  await run(task, depositTest);
-  await run(task, withdrawTest);
+
+  await deploy(msd);
+  await upgradeBSCOperator(msd);
+  await addProviders(msd);
+
+  await depositTest(msd);
+  await withdrawTest(msd);
+  await depositToCBridge(msd);
 }
 
-// deployNewOperator();
-upgrade();
+async function main() {
+  await bscOperator("EUX");
+
+  // await bscOperatorUpgrade("USX");
+}
+
+run(task, main);

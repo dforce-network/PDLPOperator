@@ -7,13 +7,13 @@
   "timeLock": {
     "contract": "Timelock",
     "path": "contracts/library/",
-    "address": "0x1E96e916A64199069CcEA2E6Cf4D63d30a61b93d"
+    "address": "0x8C3984Fb0F649c304D68DB69457DBF137D156D7a"
   },
   "MiniMinterImpl": {
     "contract": "MiniMinter",
     "address": "0xAFd25D1E68CB20D4fB2685C8e5726a0a72Fd55fe"
   },
-  "pdlpMiniMinter": {
+  "pdlpMiniMinterUSX": {
     "contract": "MiniMinter",
     "address": "0xE8db80556Ea859b15e5075992b4F0070D88B3465"
   },
@@ -21,7 +21,7 @@
     "contract": "BSCOperator",
     "address": "0x10E1bDbaa7BFaF81d45EAe8272fd780A98966B05"
   },
-  "bscOperator": {
+  "bscOperatorUSX": {
     "contract": "BSCOperator",
     "address": "0x6c69B26fBfdDA4d38e3aE2E32dCE0AB66Ba2C3c9"
   },
