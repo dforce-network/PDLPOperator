@@ -29,5 +29,22 @@
     "contract": "Whitelists",
     "path": "contracts/library/",
     "address": "0xeF535decdCA4B72608ff82A692864E1A4ccd50e5"
+  },
+  "pdlpMiniMinterEUX": {
+    "contract": "MiniMinter",
+    "address": "0x999576cdfbbC06466AB828FcAf94af6c79f450C4"
+  },
+  "BSCOperatorImpl": {
+    "contract": "BSCOperator",
+    "address": "0x50db54abdba1aacA924D3912DDA5Be6Bf9F3102b"
+  },
+  "bscOperatorEUX": {
+    "contract": "BSCOperator",
+    "address": "0xf0D29c81d3ECdf0CeD8f7cB0B77E1907575fD30c"
+  },
+  "dForceLendingProviderEUX": {
+    "contract": "dForceLendingProvider",
+    "path": "contracts/base/providers/",
+    "address": "0x46E803f7B22031717E5450A2A690D9aA42233cbd"
   }
 }

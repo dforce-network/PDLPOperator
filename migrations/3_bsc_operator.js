@@ -31,8 +31,8 @@ let deployInfo = {
       EUX: {
         ADDR: "0x367c17D19fCd0f7746764455497D63c8e8b2BbA3",
         iToken: "0x983A727Aa3491AB251780A13acb5e876D3f2B1d8",
-        viToken: "0xD86E43f400e65d1e68fE1eea409799506C51652F",
-        vMToken: "0xE189e9585b392624c343b750632C00b452022d53",
+        viToken: "0x1441b99Da7854a304133630048dc6CF43580B1Af",
+        vMToken: "0x66941a87529Ed17667dB4Ebd554b34ebBEb9372E",
         CBRIDGE: "0xdd90E5E87A2081Dcf0391920868eBc2FFB81a1aF",
       },
     },
@@ -52,7 +52,6 @@ async function deploy(msd) {
   };
   task.contractsToDeploy["bscOperator" + msd] = {
     contract: "BSCOperator",
-    path: "contracts/operator/",
     useProxy: true,
     getArgs: (deployments) => [
       MSD.ADDR,
@@ -220,10 +219,10 @@ async function bscOperator(msd) {
 }
 
 async function bscOperatorUpgrade(msd) {
-  printTenderlyInsteadOfSend(
-    TENDERLY_FORK_ID,
-    "0x8C3984Fb0F649c304D68DB69457DBF137D156D7a" // from
-  );
+  // printTenderlyInsteadOfSend(
+  //   TENDERLY_FORK_ID,
+  //   "0x8C3984Fb0F649c304D68DB69457DBF137D156D7a" // from
+  // );
 
   await deploy(msd);
   await upgradeBSCOperator(msd);
