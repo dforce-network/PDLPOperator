@@ -15,6 +15,8 @@ let task = { name: "PDLP" };
 
 const network = {
   137: "polygon",
+  2222: "kava",
+  43114: "avalanche",
 };
 
 let deployInfo = {
@@ -36,6 +38,46 @@ let deployInfo = {
         vMToken: "0x271479036bB31DE5BD4A3544Ed5bA2b8Ef4eEbD3",
         CBRIDGE: "0x88DCDC47D2f83a99CF0000FDF667A468bB958a78",
       },
+    },
+  },
+  kava: {
+    MSD_CONTROLLER: "",
+    WHITE_LIST: "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75",
+    MSDs: {
+      USX: {
+        ADDR: "",
+        iToken: "",
+        viToken: "",
+        vMToken: "",
+        CBRIDGE: "0xb51541df05DE07be38dcfc4a80c05389A54502BB",
+      },
+      // EUX: {
+      //   ADDR: "0x448BBbDB706cD0a6AB74fA3d1157e7A33Dd3A4a8",
+      //   iToken: "0x15962427A9795005c640A6BF7f99c2BA1531aD6d",
+      //   viToken: "0x3EA2c9daa2aB26dbc0852ea653f99110c335f10a",
+      //   vMToken: "0x271479036bB31DE5BD4A3544Ed5bA2b8Ef4eEbD3",
+      //   CBRIDGE: "0x88DCDC47D2f83a99CF0000FDF667A468bB958a78",
+      // },
+    },
+  },
+  avalanche: {
+    MSD_CONTROLLER: "",
+    WHITE_LIST: "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75",
+    MSDs: {
+      USX: {
+        ADDR: "",
+        iToken: "",
+        viToken: "",
+        vMToken: "",
+        CBRIDGE: "0xef3c714c9425a8F3697A9C969Dc1af30ba82e5d4",
+      },
+      // EUX: {
+      //   ADDR: "0x448BBbDB706cD0a6AB74fA3d1157e7A33Dd3A4a8",
+      //   iToken: "0x15962427A9795005c640A6BF7f99c2BA1531aD6d",
+      //   viToken: "0x3EA2c9daa2aB26dbc0852ea653f99110c335f10a",
+      //   vMToken: "0x271479036bB31DE5BD4A3544Ed5bA2b8Ef4eEbD3",
+      //   CBRIDGE: "0x88DCDC47D2f83a99CF0000FDF667A468bB958a78",
+      // },
     },
   },
 };
