@@ -42,7 +42,7 @@ let deployInfo = {
   },
   kava: {
     MSD_CONTROLLER: "",
-    WHITE_LIST: "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75",
+    WHITE_LIST: "0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e",
     MSDs: {
       USX: {
         ADDR: "",
@@ -61,14 +61,14 @@ let deployInfo = {
     },
   },
   avalanche: {
-    MSD_CONTROLLER: "",
-    WHITE_LIST: "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75",
+    MSD_CONTROLLER: "0x654f07ee98022Ec7Ed66DabDC5C0da18868bC2f0",
+    WHITE_LIST: "0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e",
     MSDs: {
       USX: {
-        ADDR: "",
-        iToken: "",
-        viToken: "",
-        vMToken: "",
+        ADDR: "0x853ea32391AaA14c112C645FD20BA389aB25C5e0",
+        iToken: "0x73C01B355F2147E5FF315680E068354D6344Eb0b",
+        viToken: "0x511eE68214890773ad112B15574d08980A83b770",
+        vMToken: "0xf6f2E11C6974cb7910Ba17F22a0B40709aCA6cb2",
         CBRIDGE: "0xef3c714c9425a8F3697A9C969Dc1af30ba82e5d4",
       },
       // EUX: {
@@ -95,7 +95,7 @@ async function deploy(msd) {
   };
   task.contractsToDeploy["polyOperator" + msd] = {
     contract: "PolyOperator",
-    path: "contracts/operator/",
+    path: "contracts/",
     useProxy: true,
     getArgs: (deployments) => [
       MSD.ADDR,
