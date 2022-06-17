@@ -41,14 +41,14 @@ let deployInfo = {
     },
   },
   kava: {
-    MSD_CONTROLLER: "",
+    MSD_CONTROLLER: "0x853ea32391AaA14c112C645FD20BA389aB25C5e0",
     WHITE_LIST: "0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e",
     MSDs: {
       USX: {
-        ADDR: "",
-        iToken: "",
-        viToken: "",
-        vMToken: "",
+        ADDR: "0xDb0E1e86B01c4ad25241b1843E407Efc4D615248",
+        iToken: "0x9787aF345E765a3fBf0F881c49f8A6830D94A514",
+        viToken: "0x7Ad45b901f4d15a2756E422768D1f4d37dAf96c1",
+        vMToken: "0x9Ee9Ed4b19100DEb781313D426A43adf2A218AB4",
         CBRIDGE: "0xb51541df05DE07be38dcfc4a80c05389A54502BB",
       },
       // EUX: {
@@ -207,9 +207,9 @@ async function polyOperator(msd) {
 }
 
 async function main() {
-  // await polyOperator("USX");
+  await polyOperator("USX");
 
-  await polyOperator("EUX");
+  // await polyOperator("EUX");
 }
 
 run(task, main);
