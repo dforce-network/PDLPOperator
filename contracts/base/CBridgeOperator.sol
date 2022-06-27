@@ -1,10 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
+pragma experimental ABIEncoderV2;
 
 import "./VaultBase.sol";
 
 interface IcBridge {
     function addLiquidity(address _token, uint256 _amount) external;
+
+    function withdraw(
+        bytes calldata _wdmsg,
+        bytes[] calldata _sigs,
+        address[] calldata _signers,
+        uint256[] calldata _powers
+    ) external;
 }
 
 abstract contract CBridgeOperator is VaultBase {
@@ -42,5 +50,20 @@ abstract contract CBridgeOperator is VaultBase {
         vault.borrow(_amount);
 
         cBridge.addLiquidity(address(USX), _amount);
+    }
+
+    /**
+     * @dev Finalize the withdraw request to the celer bridge pool
+     * can be called by anyone as request is submmitted by whitelist user
+     */
+    function withdrawFromCBridge(
+        bytes calldata _wdmsg,
+        bytes[] calldata _sigs,
+        address[] calldata _signers,
+        uint256[] calldata _powers
+    ) external nonReentrant {
+        cBridge.withdraw(_wdmsg, _sigs, _signers, _powers);
+
+        vault.repayBorrow(USX.balanceOf(address(this)));
     }
 }
