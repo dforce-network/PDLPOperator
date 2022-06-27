@@ -65,7 +65,7 @@ abstract contract L2Operator is OperatorBase {
     function addLiquidity(uint256 _amount) external {
         require(
             msg.sender == address(this) || whitelists[msg.sender],
-            "mint: Only for whitelist user and operator contract self!"
+            "addLiquidity: Only for whitelist user and operator contract self!"
         );
         cBridge.addLiquidity(address(USX), _amount);
     }
