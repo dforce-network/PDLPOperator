@@ -1,0 +1,24 @@
+{
+  "proxyAdmin": {
+    "contract": "ProxyAdmin",
+    "path": "contracts/library/",
+    "address": "0xc9aa79F70ac4a11619c649e857D74F517bBFeE47"
+  },
+  "ArbiOperatorImpl__": {
+    "contract": "ArbiOperator",
+    "address": "0x47C19A2ab52DA26551A22e2b2aEED5d19eF4022F"
+  },
+  "arbiOperatorUSX": {
+    "contract": "ArbiOperator",
+    "address": "0x1D2eB423bC723DA7f927CA21B56A4C22aF6C72B4"
+  },
+  "dForceLendingProviderUSX": {
+    "contract": "dForceLendingProvider",
+    "path": "contracts/base/providers/",
+    "address": "0xE189e9585b392624c343b750632C00b452022d53"
+  },
+  "ArbiOperatorImpl": {
+    "contract": "ArbiOperator",
+    "address": "0xD86E43f400e65d1e68fE1eea409799506C51652F"
+  }
+}

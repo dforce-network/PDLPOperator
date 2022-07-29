@@ -27,6 +27,21 @@ contract ArbiOperator is OperatorBase, FVLiquidityOperator, L2Operator {
     }
 
     /**
+     * @dev Override the storages as the layout has been redesigned.
+     *  Keep the owner and white list untouched
+     */
+    function upgrade(
+        IERC20Upgradeable _usx,
+        IFlashVault _flashVault,
+        address _cBridge,
+        address _l2Bridge
+    ) external onlyOwner {
+        __OperatorBase_init_unchained(_usx);
+        __FVLiquidityOperator_init_unchained(_flashVault);
+        __L2Operator_init_unchained(_cBridge, _l2Bridge);
+    }
+
+    /**
      * @dev Deposit USX that transfered by the corss-chain bridge to the Vault Token contract
      *      or the cBridge contract.
      * @param _data Encode data that contains operator contract address and the action that
