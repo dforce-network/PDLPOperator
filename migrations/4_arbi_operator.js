@@ -119,10 +119,7 @@ async function arbiOperator(msd) {
 }
 
 async function arbiOperatorUpgrade(msd) {
-  // printTenderlyInsteadOfSend(
-  //   TENDERLY_FORK_ID,
-  //   "0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75" // from
-  // );
+  printTransactionInsteadOfSend();
 
   await upgrade(msd);
   await addProviders(msd);

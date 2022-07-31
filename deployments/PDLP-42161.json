@@ -12,13 +12,13 @@
     "contract": "ArbiOperator",
     "address": "0x1D2eB423bC723DA7f927CA21B56A4C22aF6C72B4"
   },
+  "ArbiOperatorImpl": {
+    "contract": "ArbiOperator",
+    "address": "0x7500F0e7a6EF181edAa29171c5A78b4502e8541C"
+  },
   "dForceLendingProviderUSX": {
     "contract": "dForceLendingProvider",
     "path": "contracts/base/providers/",
-    "address": "0xE189e9585b392624c343b750632C00b452022d53"
-  },
-  "ArbiOperatorImpl": {
-    "contract": "ArbiOperator",
-    "address": "0xD86E43f400e65d1e68fE1eea409799506C51652F"
+    "address": "0x1De84422D17D7296F656B5307A9736044fEb71FA"
   }
 }
