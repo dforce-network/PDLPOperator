@@ -65,4 +65,8 @@ contract OpOperator is
         );
         flashVault.mint(address(this), _amount);
     }
+
+    function upgrade(IWithdrawBox _withdrawBox) external onlyOwner {
+        __CBridgeWithdrawer_init_unchained(_withdrawBox);
+    }
 }
