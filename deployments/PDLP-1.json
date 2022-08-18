@@ -43,8 +43,12 @@
     "contract": "EthereumOperator",
     "address": "0xa89EBE8D7471D7D36AcBFe4B0d086834390399B7"
   },
-  "ethereumOperatorImpl": {
+  "ethereumOperatorImpl____": {
     "contract": "EthereumOperator",
     "address": "0x0C0AdB03423c8232a0b7785433919EaF62A59173"
+  },
+  "ethereumOperatorImpl": {
+    "contract": "EthereumOperator",
+    "address": "0xeb8F955DAC5EDdD52489b1B361F87f6aA8830E10"
   }
 }

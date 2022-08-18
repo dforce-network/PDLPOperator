@@ -34,9 +34,13 @@
     "contract": "MiniMinter",
     "address": "0x999576cdfbbC06466AB828FcAf94af6c79f450C4"
   },
-  "BSCOperatorImpl": {
+  "BSCOperatorImpl__": {
     "contract": "BSCOperator",
     "address": "0x50db54abdba1aacA924D3912DDA5Be6Bf9F3102b"
+  },
+  "BSCOperatorImpl": {
+    "contract": "BSCOperator",
+    "address": "0xd8150d333AA9dECbfd4b5Cb535867ED9538aBF26"
   },
   "bscOperatorEUX": {
     "contract": "BSCOperator",

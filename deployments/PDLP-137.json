@@ -17,9 +17,13 @@
     "contract": "MiniMinter",
     "address": "0xc617076c27c418a3A2C593009A607A68aD178E78"
   },
-  "PolyOperatorImpl": {
+  "PolyOperatorImpl_": {
     "contract": "PolyOperator",
     "address": "0x0A6941Ef5578FdE91db5C84561eE4B4aE5C20cdd"
+  },
+  "PolyOperatorImpl": {
+    "contract": "PolyOperator",
+    "address": "0x037355Fc83F1D9Ca34868488C0414a8a1F43ddD6"
   },
   "polyOperatorUSX": {
     "contract": "PolyOperator",
