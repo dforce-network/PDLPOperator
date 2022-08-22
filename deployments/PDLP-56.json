@@ -40,6 +40,10 @@
   },
   "BSCOperatorImpl": {
     "contract": "BSCOperator",
+    "address": "0x639120d9C5595573321d34F6ee8B97784f42c734"
+  },
+  "BSCOperatorImpl___": {
+    "contract": "BSCOperator",
     "address": "0xd8150d333AA9dECbfd4b5Cb535867ED9538aBF26"
   },
   "bscOperatorEUX": {

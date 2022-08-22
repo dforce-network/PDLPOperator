@@ -23,6 +23,10 @@
   },
   "PolyOperatorImpl": {
     "contract": "PolyOperator",
+    "address": "0x197CE4142ea7B327fEaafe37827dAfB6041816F7"
+  },
+  "PolyOperatorImpl__": {
+    "contract": "PolyOperator",
     "address": "0x037355Fc83F1D9Ca34868488C0414a8a1F43ddD6"
   },
   "polyOperatorUSX": {
