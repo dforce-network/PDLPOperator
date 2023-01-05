@@ -40,15 +40,8 @@ contract ArbiOperator is
      * @dev Override the storages as the layout has been redesigned.
      *  Keep the owner and white list untouched
      */
-    function upgrade(
-        IERC20Upgradeable _usx,
-        IFlashVault _flashVault,
-        address _cBridge,
-        address _l2Bridge
-    ) external onlyOwner {
-        __OperatorBase_init_unchained(_usx);
-        __FVLiquidityOperator_init_unchained(_flashVault);
-        __L2Operator_init_unchained(_cBridge, _l2Bridge);
+    function upgrade(IWithdrawBox _withdrawBox) external onlyOwner {
+        __CBridgeWithdrawer_init_unchained(_withdrawBox);
     }
 
     /**
