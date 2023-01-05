@@ -16,9 +16,13 @@
     "contract": "ArbiOperator",
     "address": "0x7500F0e7a6EF181edAa29171c5A78b4502e8541C"
   },
-  "ArbiOperatorImpl": {
+  "ArbiOperatorImpl___": {
     "contract": "ArbiOperator",
     "address": "0x8e1d305AB9abDCB40F757b9e28C7782Af2392982"
+  },
+  "ArbiOperatorImpl": {
+    "contract": "ArbiOperator",
+    "address": "0x990F2A61D4A9BC89ED6a9e823FD24736d763f8d5"
   },
   "dForceLendingProviderUSX": {
     "contract": "dForceLendingProvider",
