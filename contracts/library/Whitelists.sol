@@ -19,8 +19,14 @@ contract Whitelists is Ownable {
      * @dev Add a new account into the whitelist.
      */
     function _addToWhitelists(address _account) external onlyOwner {
-        require(_account != address(0), "_addToWhitelists: Account can not be the zero address!");
-        require(!whitelists[_account], "_addToWhitelists: Account has already been in the whitelist!");
+        require(
+            _account != address(0),
+            "_addToWhitelists: Account can not be the zero address!"
+        );
+        require(
+            !whitelists[_account],
+            "_addToWhitelists: Account has already been in the whitelist!"
+        );
         whitelists[_account] = true;
     }
 
@@ -28,8 +34,14 @@ contract Whitelists is Ownable {
      * @dev Remove an exist account from the whitelist.
      */
     function _removeFromWhitelists(address _account) external onlyOwner {
-        require(_account != address(0), "_removeFromWhitelists: Account can not be zero address!");
-        require(whitelists[_account], "_removeFromWhitelists: Account does not in the whitelist!");
+        require(
+            _account != address(0),
+            "_removeFromWhitelists: Account can not be zero address!"
+        );
+        require(
+            whitelists[_account],
+            "_removeFromWhitelists: Account does not in the whitelist!"
+        );
         whitelists[_account] = false;
     }
 }

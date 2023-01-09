@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
+pragma experimental ABIEncoderV2;
 
 import "./base/L1ArbiBridgeOperator.sol";
 import "./base/L1OptiBridgeOperator.sol";
 import "./base/CBridgeOperator.sol";
 import "./base/VLiquidityOperator.sol";
+import "./base/CBridgeWithdrawer.sol";
 
 contract EthereumOperator is
     VaultBase,
     L1ArbiBridgeOperator,
     CBridgeOperator,
     L1OptiBridgeOperator,
-    VLiquidityOperator
+    VLiquidityOperator,
+    CBridgeWithdrawer
 {
     constructor(
         IERC20Upgradeable _usx,
@@ -21,7 +24,8 @@ contract EthereumOperator is
         IcBridge _cBridge,
         address _l2USX,
         IL1OptiUSXGateway _l1OptiGateway,
-        address _l2OptiOperator
+        address _l2OptiOperator,
+        IWithdrawBox _withdrawBox
     ) public {
         _initialize(
             _usx,
@@ -31,7 +35,8 @@ contract EthereumOperator is
             _cBridge,
             _l2USX,
             _l1OptiGateway,
-            _l2OptiOperator
+            _l2OptiOperator,
+            _withdrawBox
         );
     }
 
@@ -48,6 +53,7 @@ contract EthereumOperator is
         address _l2USX,
         IL1OptiUSXGateway _l1OptiGateway,
         address _l2OptiOperator,
+        IWithdrawBox _withdrawBox,
         address _iTokenProvider,
         address _qTokenProvider
     ) public {
@@ -59,7 +65,8 @@ contract EthereumOperator is
             _cBridge,
             _l2USX,
             _l1OptiGateway,
-            _l2OptiOperator
+            _l2OptiOperator,
+            _withdrawBox
         );
 
         LiquidityOperator._addProvider(_iTokenProvider);
@@ -78,7 +85,8 @@ contract EthereumOperator is
         IcBridge _cBridge,
         address _l2USX,
         IL1OptiUSXGateway _l1OptiGateway,
-        address _l2OptiOperator
+        address _l2OptiOperator,
+        IWithdrawBox _withdrawBox
     ) internal initializer {
         __VaultBase_init(_usx, _vault);
         __L1ArbiBridgeOperator_init_unchained(_l1ArbiGateway, _l2ArbiOperator);
@@ -90,25 +98,10 @@ contract EthereumOperator is
         );
 
         __LiquidityOperator_init_unchained();
+        __CBridgeWithdrawer_init_unchained(_withdrawBox);
     }
 
-    /**
-     * @dev Current Ethereum Operator is a VaultBase, L1ArbiBridgeOperator and CBridgeOperator,
-     *      Only set Optimism once, liquidity providers will be added separately
-     */
-    function upgrade(
-        address _l2USX,
-        IL1OptiUSXGateway _l1OptiGateway,
-        address _l2OptiOperator
-    ) external onlyOwner {
-        require(address(l2USX) == address(0), "Operator already upgraded");
-
-        __L1OptiBridgeOperator_init_unchained(
-            _l2USX,
-            _l1OptiGateway,
-            _l2OptiOperator
-        );
-
-        __LiquidityOperator_init_unchained();
+    function upgrade(IWithdrawBox _withdrawBox) external onlyOwner {
+        __CBridgeWithdrawer_init_unchained(_withdrawBox);
     }
 }
