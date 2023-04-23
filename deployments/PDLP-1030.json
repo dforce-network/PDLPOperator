@@ -1,0 +1,30 @@
+{
+  "proxyAdmin": {
+    "contract": "ProxyAdmin",
+    "path": "contracts/library/",
+    "address": "0xD037c36dbc81a8890728D850E080e38F6EeB95EF"
+  },
+  "MiniMinterImpl": {
+    "contract": "MiniMinter",
+    "address": "0xB474D6F3C3d5E39CA700Da257b61d94D1C2b7D02"
+  },
+  "pdlpMiniMinterUSX": {
+    "contract": "MiniMinter",
+    "address": "0xB5b3da79789dE012Fd75108138b2315E5645715A"
+  },
+  "PolyOperatorImpl": {
+    "contract": "PolyOperator",
+    "path": "contracts/",
+    "address": "0x710Ea5d0F596FAdE797d71c41Ba949de48147604"
+  },
+  "polyOperatorUSX": {
+    "contract": "PolyOperator",
+    "path": "contracts/",
+    "address": "0x8d717271b1A0aE97fcdF7D0a21Fa3DE4334b1EFd"
+  },
+  "dForceLendingProviderUSX": {
+    "contract": "dForceLendingProvider",
+    "path": "contracts/base/providers/",
+    "address": "0x149A632d2F147d08Da4cDBe730b486694Fa4Dd80"
+  }
+}
