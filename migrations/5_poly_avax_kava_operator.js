@@ -82,14 +82,14 @@ let deployInfo = {
     },
   },
   confluxeSpace: {
-    MSD_CONTROLLER: "",
-    WHITE_LIST: "",
+    MSD_CONTROLLER: "0x13c0361698A38Ec1200C8BEC722F4D9aD0A2f558",
+    WHITE_LIST: "0x655284BebCC6e1DfFd098Ec538750D43B57bC743",
     MSDs: {
       USX: {
-        ADDR: "",
-        iToken: "",
-        viToken: "",
-        vMToken: "",
+        ADDR: "0x422a86f57b6b6F1e557d406331c25EEeD075E7aA",
+        iToken: "0x6f87b39a2e36F205706921d81a6861B655db6358",
+        viToken: "0x86516fd394781f9e23090F0A1e7C201DbDACc02C",
+        vMToken: "0x2871cFaEcaeb16e1CECd8044B1A3892d9f706808",
         CBRIDGE: "0x841ce48f9446c8e281d3f1444cb859b4a6d0738c",
       },
       // EUX: {
