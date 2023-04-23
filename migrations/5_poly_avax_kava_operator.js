@@ -17,6 +17,7 @@ const network = {
   137: "polygon",
   2222: "kava",
   43114: "avalanche",
+  1030: "confluxeSpace",
 };
 
 let deployInfo = {
@@ -70,6 +71,26 @@ let deployInfo = {
         viToken: "0x511eE68214890773ad112B15574d08980A83b770",
         vMToken: "0xf6f2E11C6974cb7910Ba17F22a0B40709aCA6cb2",
         CBRIDGE: "0xef3c714c9425a8F3697A9C969Dc1af30ba82e5d4",
+      },
+      // EUX: {
+      //   ADDR: "0x448BBbDB706cD0a6AB74fA3d1157e7A33Dd3A4a8",
+      //   iToken: "0x15962427A9795005c640A6BF7f99c2BA1531aD6d",
+      //   viToken: "0x3EA2c9daa2aB26dbc0852ea653f99110c335f10a",
+      //   vMToken: "0x271479036bB31DE5BD4A3544Ed5bA2b8Ef4eEbD3",
+      //   CBRIDGE: "0x88DCDC47D2f83a99CF0000FDF667A468bB958a78",
+      // },
+    },
+  },
+  confluxeSpace: {
+    MSD_CONTROLLER: "",
+    WHITE_LIST: "",
+    MSDs: {
+      USX: {
+        ADDR: "",
+        iToken: "",
+        viToken: "",
+        vMToken: "",
+        CBRIDGE: "0x841ce48f9446c8e281d3f1444cb859b4a6d0738c",
       },
       // EUX: {
       //   ADDR: "0x448BBbDB706cD0a6AB74fA3d1157e7A33Dd3A4a8",
