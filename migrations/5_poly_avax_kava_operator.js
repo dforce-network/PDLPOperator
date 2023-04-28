@@ -91,6 +91,7 @@ let deployInfo = {
         viToken: "0x86516fd394781f9e23090F0A1e7C201DbDACc02C",
         vMToken: "0x2871cFaEcaeb16e1CECd8044B1A3892d9f706808",
         CBRIDGE: "0x841ce48f9446c8e281d3f1444cb859b4a6d0738c",
+        WITHDRAWBOX: "0x78a21c1d3ed53a82d4247b9ee5bf001f4620ceec",
       },
       // EUX: {
       //   ADDR: "0x448BBbDB706cD0a6AB74fA3d1157e7A33Dd3A4a8",
@@ -123,6 +124,7 @@ async function deploy(msd) {
       MSD.vMToken,
       deployments["pdlpMiniMinter" + msd].address,
       MSD.CBRIDGE,
+      MSD.WITHDRAWBOX,
     ],
   };
   task.contractsToDeploy["dForceLendingProvider" + msd] = {
