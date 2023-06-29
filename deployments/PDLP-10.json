@@ -12,9 +12,13 @@
     "contract": "OpOperator",
     "address": "0x86D9B423172B336bb7A4BA84354a9644EDbC4C4E"
   },
-  "OpOperatorImpl": {
+  "OpOperatorImpl___": {
     "contract": "OpOperator",
     "address": "0x8e1d305AB9abDCB40F757b9e28C7782Af2392982"
+  },
+  "OpOperatorImpl": {
+    "contract": "OpOperator",
+    "address": "0xc132624055A3e6e1EF4457053c528df179B18285"
   },
   "opOperator": {
     "contract": "OpOperator",

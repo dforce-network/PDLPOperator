@@ -38,13 +38,17 @@
     "contract": "BSCOperator",
     "address": "0x50db54abdba1aacA924D3912DDA5Be6Bf9F3102b"
   },
-  "BSCOperatorImpl": {
+  "BSCOperatorImpl___": {
     "contract": "BSCOperator",
     "address": "0x639120d9C5595573321d34F6ee8B97784f42c734"
   },
-  "BSCOperatorImpl___": {
+  "BSCOperatorImpl____": {
     "contract": "BSCOperator",
     "address": "0xd8150d333AA9dECbfd4b5Cb535867ED9538aBF26"
+  },
+  "BSCOperatorImpl": {
+    "contract": "BSCOperator",
+    "address": "0xD037c36dbc81a8890728D850E080e38F6EeB95EF"
   },
   "bscOperatorEUX": {
     "contract": "BSCOperator",
