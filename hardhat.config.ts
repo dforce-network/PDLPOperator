@@ -5,6 +5,9 @@ import "dotenv/config";
 // import "solidity-coverage";
 import "hardhat-storage-layout";
 
+import "@matterlabs/hardhat-zksync-deploy";
+import "@matterlabs/hardhat-zksync-solc";
+
 const privateKey = process.env.PRIVATE_KEY;
 const infuraKey = process.env.INFURA_KEY;
 const alchemyKey = process.env.ALCHEMY_KEY;
@@ -31,7 +34,7 @@ export default {
       //   url: "https://arb-mainnet.g.alchemy.com/v2/" + alchemyKey,
       // },
     },
-    'truffle-dashboard': {
+    "truffle-dashboard": {
       url: "http://localhost:24012/rpc",
       timeout: 200000,
     },
@@ -52,6 +55,18 @@ export default {
       accounts: [`0x${privateKey}`],
       gas: 8000000,
     },
+    zkSyncTestnet: {
+      url: "https://testnet.era.zksync.dev",
+      accounts: [`0x${privateKey}`],
+      ethNetwork: "goerli", // Can also be the RPC URL of the network (e.g. `https://goerli.infura.io/v3/<API_KEY>`)
+      zksync: true,
+    },
+    zkSyncEra: {
+      url: "https://era.zksync.dev",
+      accounts: [`0x${privateKey}`],
+      ethNetwork: "mainnet", // Can also be the RPC URL of the network (e.g. `https://goerli.infura.io/v3/<API_KEY>`)
+      zksync: true,
+    },
   },
   solidity: {
     compilers: [
@@ -70,5 +85,23 @@ export default {
         },
       },
     ],
+  },
+  zksolc: {
+    version: "latest",
+    compilerSource: "binary",
+    settings: {
+      //compilerPath: "zksolc",  // optional. Ignored for compilerSource "docker". Can be used if compiler is located in a specific folder
+      experimental: {
+        dockerImage: "matterlabs/zksolc", // Deprecated! use, compilerSource: "binary"
+        tag: "latest", // Deprecated: used for compilerSource: "docker"
+      },
+      libraries: {}, // optional. References to non-inlinable libraries
+      isSystem: false, // optional.  Enables Yul instructions available only for zkSync system contracts and libraries
+      forceEvmla: false, // optional. Falls back to EVM legacy assembly if there is a bug with Yul
+      optimizer: {
+        enabled: true, // optional. True by default
+        mode: "z", // optional. 3 by default, z to optimize bytecode size
+      },
+    },
   },
 };
