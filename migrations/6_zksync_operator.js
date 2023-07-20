@@ -25,8 +25,8 @@ let deployInfo = {
     MSDs: {
       USX: {
         ADDR: "0x7fFBa6Ce2f536fC9782ff9AA1EbBa186849BAb89",
-        // iToken: "0x6f87b39a2e36F205706921d81a6861B655db6358",
-        // viToken: "0x86516fd394781f9e23090F0A1e7C201DbDACc02C",
+        iToken: ethers.constants.AddressZero,
+        viToken: ethers.constants.AddressZero,
         vMToken: ethers.constants.AddressZero,
         CBRIDGE: "0x427F4542bA6208DF2B0b75B0a2d0797CbEba1628",
         WITHDRAWBOX: "0x78a21c1d3ed53a82d4247b9ee5bf001f4620ceec",
@@ -38,6 +38,20 @@ let deployInfo = {
       //   vMToken: "0x271479036bB31DE5BD4A3544Ed5bA2b8Ef4eEbD3",
       //   CBRIDGE: "0x88DCDC47D2f83a99CF0000FDF667A468bB958a78",
       // },
+    },
+  },
+  zkSyncEra: {
+    MSD_CONTROLLER: "0x6C56a24D587357e13bf9daBeA9f6bb2Cf3fda97c",
+    WHITE_LIST: "",
+    MSDs: {
+      USX: {
+        ADDR: "0xdb89D7b0Dccd0C0e5aC3571133A9aa1a037945cb",
+        iToken: ethers.constants.AddressZero,
+        viToken: ethers.constants.AddressZero,
+        vMToken: ethers.constants.AddressZero,
+        CBRIDGE: "0x54069e96C4247b37C2fbd9559CA99f08CD1CD66c",
+        WITHDRAWBOX: "0x80Bd61013F1ca7908b75d88AD08f8dBdEab4e779",
+      },
     },
   },
 };
@@ -113,56 +127,6 @@ async function getName(contractAddr) {
 }
 
 async function depositToCBridge(msd) {
-  // const info = deployInfo[network[task.chainId]];
-  // const MSD = info.MSDs[msd];
-
-  // task.contractsToDeploy = {};
-
-  // task.contractsToDeploy.ZksyncOperatorImpl = {
-  //   contract: "ZksyncOperator",
-  //   path: "contracts/",
-  //   useProxy: true,
-  //   getArgs: (deployments) => [
-  //     MSD.ADDR,
-  //     MSD.vMToken,
-  //     deployments["pdlpMiniMinter" + msd].address,
-  //     MSD.CBRIDGE,
-  //     MSD.WITHDRAWBOX,
-  //   ],
-  // };
-
-  // await deployContracts(task);
-
-  // Update reward dostributor in general pool
-  // let data = new ethers.utils.AbiCoder().encode(
-  //   ["address", "address"],
-  //   [
-  //     task.contracts.pdlpOperatorUSX.address,
-  //     task.contracts.ZksyncOperatorImpl.address,
-  //   ]
-  // );
-
-  // let targets = [];
-  // let values = [];
-  // let signatures = [];
-  // let calldatas = [];
-
-  // targets.push(task.contracts.proxyAdmin.address);
-  // values.push(0);
-  // signatures.push("upgrade(address,address)");
-  // calldatas.push(data);
-
-  // await sendTransaction(task, "timelock", "executeTransactions", [
-  //   targets,
-  //   values,
-  //   signatures,
-  //   calldatas,
-  // ]);
-
-  // await sendTransaction(task, "pdlpOperator" + msd, "upgrade", [
-  //   deployInfo[network[task.chainId]].MSDs[msd].CBRIDGE,
-  // ]);
-
   await sendTransaction(task, "pdlpOperator" + msd, "depositToCBridge", [
     ethers.utils.parseEther("10000"),
   ]);
@@ -207,13 +171,16 @@ async function pdlpOperator(msd) {
   // );
 
   // The flash vault should be deployed first
-  // await deploy(msd);
-  // await setOwner(msd);
+  await deploy(msd);
+  await setOwner(msd);
+
+  // No need for providers on zksync now
   // await addProviders(msd);
 
   // After minter and whitelist is set, we can deposit
   // await depositTest(msd);
   // await withdrawTest(msd);
+
   await depositToCBridge(msd);
 }
 
