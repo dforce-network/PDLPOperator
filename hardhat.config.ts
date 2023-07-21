@@ -62,7 +62,7 @@ export default {
       zksync: true,
     },
     zkSyncEra: {
-      url: "https://era.zksync.dev",
+      url: "https://mainnet.era.zksync.io",
       accounts: [`0x${privateKey}`],
       ethNetwork: "mainnet", // Can also be the RPC URL of the network (e.g. `https://goerli.infura.io/v3/<API_KEY>`)
       zksync: true,
