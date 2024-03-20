@@ -18,6 +18,7 @@ const network = {
   2222: "kava",
   43114: "avalanche",
   1030: "confluxeSpace",
+  8453: "base",
 };
 
 let deployInfo = {
@@ -100,6 +101,20 @@ let deployInfo = {
       //   vMToken: "0x271479036bB31DE5BD4A3544Ed5bA2b8Ef4eEbD3",
       //   CBRIDGE: "0x88DCDC47D2f83a99CF0000FDF667A468bB958a78",
       // },
+    },
+  },
+  base: {
+    MSD_CONTROLLER: "0x82a295b259316c6180BBb7405909a2D1dB63e6D8",
+    WHITE_LIST: "0x655284BebCC6e1DfFd098Ec538750D43B57bC743",
+    MSDs: {
+      USX: {
+        ADDR: "0xc142171B138DB17a1B7Cb999C44526094a4dae05",
+        iToken: "0x82AFc965E4E18009DD8d5AF05cfAa99bF0E605df",
+        viToken: "0x5dE10D31af27C2cfD21f79a666CD9F9aDdf763E3",
+        vMToken: "0xB8e4763bEf607d9253cfb28511f8C1073441CeeA",
+        CBRIDGE: "0x7d43AABC515C356145049227CeE54B608342c0ad",
+        WITHDRAWBOX: "0xAeC3b47eda9040b9C12F2Ac8d6980d2D2Bcc99F5",
+      },
     },
   },
 };

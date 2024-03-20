@@ -67,6 +67,10 @@ export default {
       ethNetwork: "mainnet", // Can also be the RPC URL of the network (e.g. `https://goerli.infura.io/v3/<API_KEY>`)
       zksync: true,
     },
+    base: {
+      url: "http://localhost:24012/rpc", // truffle-dashboard
+      timeout: 2000000,
+    },
   },
   solidity: {
     compilers: [
