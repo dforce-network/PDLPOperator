@@ -112,3 +112,7 @@ cache-zk/
 
 # git worktrees
 .worktrees/
+
+# Foundry build output
+out/
+foundry.lock
