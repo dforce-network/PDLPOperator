@@ -71,8 +71,13 @@ local `MiniMinter.totalMint` debt where a minter exists.
 | Polygon EUX | 0 | `pdlpMiniMinterEUX` | 1,000 |
 | Kava USX | 0 | `pdlpMiniMinterUSX` | 1,993 |
 | Conflux eSpace USX | 3,623 | `pdlpMiniMinterUSX` | 91 |
+| Avalanche USX | 0 | `pdlpMiniMinterUSX` | 3,973 |
 
 These are small and independent of the bridged Ethereum liquidity.
+
+> **Avalanche whitelist note:** the whitelist candidate `0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e`
+> is **not active** (✗) on the Avalanche operator. The operator wallet is already 0, but if any
+> burn/cleanup is later required there, an address must first be added via `_addToWhitelists`.
 
 ---
 
@@ -81,13 +86,11 @@ These are small and independent of the bridged Ethereum liquidity.
 | Chain | Reason |
 |---|---|
 | zkSync Era (280) | deployment JSON `PDLP-280.json` is **not committed to git**, so absent from this branch. |
-| Avalanche (43114) | `AVALANCHE_RPC` in `.env` returned a network error. |
 
-To include these: commit the zkSync deployment file and supply a working Avalanche RPC URL, then
-re-run `scripts/status.js`.
+To include this: commit the zkSync deployment file, then re-run `scripts/status.js`.
 
-> Conflux eSpace (1030) was unreachable in the initial run but has since been re-read with an
-> updated `CONFLUX_RPC`; its figures are included in §3 above.
+> Conflux eSpace (1030) and Avalanche (43114) were unreachable in the initial run but have since
+> been re-read with updated `CONFLUX_RPC` / `AVALANCHE_RPC`; their figures are included in §3 above.
 
 ---
 
@@ -129,5 +132,6 @@ upstream of it and are not yet scripted.
 | Polygon (137) | `0x99E8352D079326Bc431633a61954F713AafE372C` (USX) / `0xC9d1cbc45dd3e86E98067B7eb279C13F7B77C627` (EUX) | — | — |
 | Kava (2222) | `0xcA09A0a386ac213703e7F70f0b468dde39f026BC` | — | — |
 | Conflux eSpace (1030) | `0x8d717271b1A0aE97fcdF7D0a21Fa3DE4334b1EFd` | — | — |
+| Avalanche (43114) | `0x2610CC2f20F9F3c1B180b7e8836C8c222a540cc8` | — | — |
 
 USX token addresses and whitelist candidates per chain are in `scripts/config.js`.
