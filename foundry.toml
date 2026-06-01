@@ -8,9 +8,11 @@ remappings = [
     "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
     "forge-std/=lib/forge-std/src/",
 ]
-solc_version = "0.6.12"
 optimizer = true
 optimizer_runs = 200
+
+# Contracts use 0.6.12; test file uses ^0.8.13 (forge-std requirement).
+# Foundry resolves each file's version from its pragma automatically.
 
 [profile.default.fuzz]
 runs = 128
