@@ -70,6 +70,7 @@ local `MiniMinter.totalMint` debt where a minter exists.
 | Polygon USX | 172,824 | `pdlpMiniMinterUSX` | 144,030 |
 | Polygon EUX | 0 | `pdlpMiniMinterEUX` | 1,000 |
 | Kava USX | 0 | `pdlpMiniMinterUSX` | 1,993 |
+| Conflux eSpace USX | 3,623 | `pdlpMiniMinterUSX` | 91 |
 
 These are small and independent of the bridged Ethereum liquidity.
 
@@ -80,11 +81,13 @@ These are small and independent of the bridged Ethereum liquidity.
 | Chain | Reason |
 |---|---|
 | zkSync Era (280) | deployment JSON `PDLP-280.json` is **not committed to git**, so absent from this branch. |
-| Conflux eSpace (1030) | `CONFLUX_RPC` in `.env` returned a network error. |
 | Avalanche (43114) | `AVALANCHE_RPC` in `.env` returned a network error. |
 
-To include these: commit the zkSync deployment file and supply working RPC URLs, then re-run
-`scripts/status.js`.
+To include these: commit the zkSync deployment file and supply a working Avalanche RPC URL, then
+re-run `scripts/status.js`.
+
+> Conflux eSpace (1030) was unreachable in the initial run but has since been re-read with an
+> updated `CONFLUX_RPC`; its figures are included in §3 above.
 
 ---
 
@@ -125,5 +128,6 @@ upstream of it and are not yet scripted.
 | BSC (56) | `0x6c69B26fBfdDA4d38e3aE2E32dCE0AB66Ba2C3c9` (USX) / `0xf0D29c81d3ECdf0CeD8f7cB0B77E1907575fD30c` (EUX) | — | — |
 | Polygon (137) | `0x99E8352D079326Bc431633a61954F713AafE372C` (USX) / `0xC9d1cbc45dd3e86E98067B7eb279C13F7B77C627` (EUX) | — | — |
 | Kava (2222) | `0xcA09A0a386ac213703e7F70f0b468dde39f026BC` | — | — |
+| Conflux eSpace (1030) | `0x8d717271b1A0aE97fcdF7D0a21Fa3DE4334b1EFd` | — | — |
 
 USX token addresses and whitelist candidates per chain are in `scripts/config.js`.
