@@ -133,13 +133,35 @@ user or the owner. `scripts/whitelist-trace.js` exploits this:
 2. collect distinct successful senders + their last-seen date,
 3. cross-check each against the live `whitelists(address)` mapping over RPC.
 
-**Why it matters:** the migration-time candidate list in `scripts/config.js` is **stale on some
-chains**. Example — Avalanche: the config listed `0x75B9a7B6…`, but tracing shows the real
-whitelisted operator is `0xDE6D6f23…` (active 2026-05). The config has been corrected. Treat
-`whitelist-trace.js` output, not the static list, as the source of truth before acting.
+**Why it matters:** the migration-time candidate list in `scripts/config.js` was **stale on Kava
+and Avalanche** — both listed `0x75B9a7B6…`, but that address was migrated away and the real
+current operator is `0xDE6D6f23…`. The config has been corrected. Treat `whitelist-trace.js`
+output (and live `whitelists()` checks), not the static list, as the source of truth.
 
-Verified working: Conflux (owner + `0x655284Be…` ✓), Avalanche (`0xDE6D6f23…` ✓). Etherscan V2
-chains (1/10/56/137/42161) need `ETHERSCAN_KEY` in `.env`; Kava's explorer currently returns 403.
+### Active whitelist user per operator (verified)
+
+`0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75` is the current whitelist operator on **every USX
+chain**. Conflux is the only exception. Verification method: ✅ = confirmed via explorer tx-trace
+*and* live `whitelists()`; 🔗 = explorer unavailable on free plan, confirmed via `whitelists()` RPC only.
+
+| Chain | Active whitelist user | Last tx seen | Method |
+|---|---|---|---|
+| Ethereum (1) | `0xDE6D6f23…` | 2026-05-20 (39 txs) | ✅ |
+| Optimism (10) | `0xDE6D6f23…` | — (explorer not on free plan) | 🔗 |
+| BSC (56, USX) | `0xDE6D6f23…` | — (explorer not on free plan) | 🔗 |
+| Polygon (137, USX) | `0xDE6D6f23…` | 2026-05-16 (47 txs) | ✅ |
+| Arbitrum (42161) | `0xDE6D6f23…` | 2026-05-20 (19 txs) | ✅ |
+| Kava (2222) | `0xDE6D6f23…` | — (explorer 403) | 🔗 |
+| Avalanche (43114) | `0xDE6D6f23…` | 2026-05-16 (8 txs) | ✅ |
+| Conflux eSpace (1030) | `0x655284Be…` | 2023-09-08 (11 txs) | ✅ |
+
+Stale/past users (no longer whitelisted): `0x75B9a7B6…` on Kava & Avalanche (last active 2022),
+`0xDE6D6f23…` on Polygon **EUX** (last 2023; EUX operator no longer whitelisted).
+
+**Explorer coverage:** free Etherscan V2 plan covers Ethereum / Polygon / Arbitrum; Optimism, BSC,
+Avalanche need a paid plan (Avalanche has a working keyless Routescan fallback). Conflux uses
+keyless ConfluxScan. Kava's explorer returns 403 — for those, the known operator is confirmed via
+`whitelists()` RPC (in `status.js`) instead.
 
 ---
 

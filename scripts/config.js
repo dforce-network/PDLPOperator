@@ -20,9 +20,10 @@ const WHITELIST_CANDIDATES = {
   10:    ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75"],
   42161: ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75"],
   137:   ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75"],
-  2222:  ["0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e"],
-  // Avalanche: migration config used 0x75B9..., but tx-tracing (whitelist-trace.js)
-  // shows the actually-whitelisted operator is 0xDE6D... (active 2026-05).
+  // Kava & Avalanche: migration config used 0x75B9..., but tx-tracing + RPC checks
+  // (whitelist-trace.js) show the actually-whitelisted operator is 0xDE6D... — the
+  // old 0x75B9... was migrated away. 0xDE6D... is the current operator on every USX chain.
+  2222:  ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75", "0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e"],
   43114: ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75", "0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e"],
   1030:  ["0x655284BebCC6e1DfFd098Ec538750D43B57bC743"],
   280:   ["0x6b29b8af9AF126170513AE6524395E09025b214E"],
@@ -45,9 +46,11 @@ const RPC_KEYS = {
 //   - "url": a standalone Etherscan-compatible endpoint (keyless or own key)
 // Used by scripts/whitelist-trace.js to find who actually calls the operator.
 const EXPLORERS = {
+  // Free Etherscan V2 covers 1 / 137 / 42161. Optimism, BSC, Avalanche need a paid
+  // Etherscan plan; for those we add a keyless fallback where one exists (Routescan).
   1:     { kind: "etherscanV2" },
-  56:    { kind: "etherscanV2" },
-  10:    { kind: "etherscanV2" },
+  56:    { kind: "etherscanV2" }, // no reliable keyless fallback — needs paid plan or BscScan key
+  10:    { kind: "etherscanV2", fallbackUrl: "https://api.routescan.io/v2/network/mainnet/evm/10/etherscan/api" },
   42161: { kind: "etherscanV2" },
   137:   { kind: "etherscanV2" },
   43114: { kind: "etherscanV2", fallbackUrl: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan/api" },

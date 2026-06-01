@@ -38,24 +38,39 @@ function httpGet(url) {
   });
 }
 
-// Build the explorer txlist URL for a chain, or return null if unavailable.
-function buildTxlistUrl(chainId, address, limit) {
+// Build an ordered list of explorer txlist URLs to try (primary first, then fallbacks).
+function buildTxlistUrls(chainId, address, limit) {
   const exp = EXPLORERS[chainId];
-  if (!exp) return null;
+  if (!exp) return [];
   const common = `module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=${limit}&sort=desc`;
+  const urls = [];
 
   if (exp.kind === "etherscanV2") {
     const key = process.env.ETHERSCAN_KEY;
-    if (key) {
-      return `https://api.etherscan.io/v2/api?chainid=${chainId}&${common}&apikey=${key}`;
+    if (key) urls.push(`https://api.etherscan.io/v2/api?chainid=${chainId}&${common}&apikey=${key}`);
+    if (exp.fallbackUrl) urls.push(`${exp.fallbackUrl}?${common}`);
+  } else if (exp.kind === "url") {
+    urls.push(`${exp.url}?${common}`);
+    if (exp.fallbackUrl) urls.push(`${exp.fallbackUrl}?${common}`);
+  }
+  return urls;
+}
+
+// Fetch txlist trying each candidate URL until one yields a result array.
+// Returns { txs } on success or { error } describing the last failure.
+async function fetchTxlist(urls) {
+  let lastMsg = "no explorer configured";
+  for (const url of urls) {
+    try {
+      const raw = await httpGet(url);
+      const j = JSON.parse(raw);
+      if (j.status === "1" && Array.isArray(j.result)) return { txs: j.result };
+      lastMsg = j.message || String(j.result);
+    } catch (e) {
+      lastMsg = e.message;
     }
-    if (exp.fallbackUrl) return `${exp.fallbackUrl}?${common}`;
-    return null; // no key and no keyless fallback
   }
-  if (exp.kind === "url") {
-    return `${exp.url}?${common}`;
-  }
-  return null;
+  return { error: lastMsg };
 }
 
 async function traceChain(chainId, limit) {
@@ -70,9 +85,8 @@ async function traceChain(chainId, limit) {
   console.log(`Chain ${chainId} (${CHAIN_NAMES[chainId]})`);
   console.log(`${"=".repeat(60)}`);
 
-  const url0 = buildTxlistUrl(chainId, "0x", limit);
-  if (!url0) {
-    console.log(`  SKIP — no explorer configured (set ETHERSCAN_KEY for this chain?)`);
+  if (buildTxlistUrls(chainId, "0x", limit).length === 0) {
+    console.log(`  SKIP — no explorer configured`);
     return;
   }
 
@@ -83,21 +97,13 @@ async function traceChain(chainId, limit) {
     if (!opEntry) continue;
     const opAddr = opEntry.address;
 
-    const url = buildTxlistUrl(chainId, opAddr, limit);
-    let txs;
-    try {
-      const raw = await httpGet(url);
-      const j = JSON.parse(raw);
-      if (j.status !== "1" || !Array.isArray(j.result)) {
-        const hint = (EXPLORERS[chainId].kind === "etherscanV2" && !process.env.ETHERSCAN_KEY)
-          ? "  (keyless fallback may be rate-limited — set ETHERSCAN_KEY for a reliable Etherscan V2 query)"
-          : "";
-        console.log(`\n  ${opKey} (${opAddr}): explorer returned "${j.message || j.result}"${hint}`);
-        continue;
-      }
-      txs = j.result;
-    } catch (e) {
-      console.log(`\n  ${opKey} (${opAddr}): explorer error — ${e.message}`);
+    const { txs, error } = await fetchTxlist(buildTxlistUrls(chainId, opAddr, limit));
+    if (error) {
+      const isFreePlanGap = /not supported for this chain/i.test(error);
+      const hint = isFreePlanGap
+        ? "  (free Etherscan plan doesn't cover this chain; known candidates are still RPC-verified by status.js)"
+        : "";
+      console.log(`\n  ${opKey} (${opAddr}): explorer unavailable — "${error}"${hint}`);
       continue;
     }
 
