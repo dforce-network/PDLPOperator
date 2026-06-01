@@ -19,6 +19,17 @@ const OPERATOR_ABI = [
 const PROXY_ADMIN_ABI = [
   "function owner() view returns (address)",
 ];
+const MINTER_ABI = [
+  "function totalMint() view returns (uint256)",
+  "function owner() view returns (address)",
+];
+
+// Find MiniMinter proxy entries in a deployment (exclude the shared impl).
+function findMinterKeys(deployment) {
+  return Object.keys(deployment).filter(
+    (key) => deployment[key].contract === "MiniMinter" && !key.includes("Impl")
+  );
+}
 
 async function checkChain(chainId) {
   const rpcUrl = process.env[RPC_KEYS[chainId]];
@@ -84,6 +95,27 @@ async function checkChain(chainId) {
         let ok = false;
         try { ok = await operator.whitelists(addr); } catch (_) {}
         console.log(`      ${addr}  ${ok ? "✓" : "✗"}`);
+      }
+    }
+  }
+
+  const minterKeys = findMinterKeys(deployment);
+  if (minterKeys.length > 0) {
+    console.log(`\n  MiniMinters:`);
+    for (const minterKey of minterKeys) {
+      const minterAddr = deployment[minterKey].address;
+      const minter = new ethers.Contract(minterAddr, MINTER_ABI, provider);
+      let owner = "N/A";
+      try { owner = await minter.owner(); } catch (_) {}
+      try {
+        const totalMint = await minter.totalMint();
+        const fmt = ethers.utils.formatEther(totalMint);
+        console.log(`    ${minterKey}: ${minterAddr}`);
+        console.log(`      owner:     ${owner}`);
+        console.log(`      totalMint: ${Number(fmt).toLocaleString("en-US", { maximumFractionDigits: 4 })}  (raw: ${totalMint.toString()})`);
+      } catch (e) {
+        console.log(`    ${minterKey}: ${minterAddr}`);
+        console.log(`      totalMint: ERROR — ${e.message}`);
       }
     }
   }
