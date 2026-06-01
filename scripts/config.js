@@ -21,7 +21,9 @@ const WHITELIST_CANDIDATES = {
   42161: ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75"],
   137:   ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75"],
   2222:  ["0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e"],
-  43114: ["0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e"],
+  // Avalanche: migration config used 0x75B9..., but tx-tracing (whitelist-trace.js)
+  // shows the actually-whitelisted operator is 0xDE6D... (active 2026-05).
+  43114: ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75", "0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e"],
   1030:  ["0x655284BebCC6e1DfFd098Ec538750D43B57bC743"],
   280:   ["0x6b29b8af9AF126170513AE6524395E09025b214E"],
 };
@@ -36,6 +38,22 @@ const RPC_KEYS = {
   43114: "AVALANCHE_RPC",
   1030:  "CONFLUX_RPC",
   280:   "ZKSYNC_RPC",
+};
+
+// Block-explorer endpoints for transaction-history discovery (Etherscan-compatible APIs).
+//   - "etherscanV2": unified Etherscan API; needs ETHERSCAN_KEY, pass ?chainid=<id>
+//   - "url": a standalone Etherscan-compatible endpoint (keyless or own key)
+// Used by scripts/whitelist-trace.js to find who actually calls the operator.
+const EXPLORERS = {
+  1:     { kind: "etherscanV2" },
+  56:    { kind: "etherscanV2" },
+  10:    { kind: "etherscanV2" },
+  42161: { kind: "etherscanV2" },
+  137:   { kind: "etherscanV2" },
+  43114: { kind: "etherscanV2", fallbackUrl: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan/api" },
+  2222:  { kind: "url", url: "https://kavascan.com/api" }, // note: may 403; Kava operator wallet is 0 anyway
+  1030:  { kind: "url", url: "https://evmapi.confluxscan.org/api" },
+  // zkSync (280) — Etherscan V2 supports chainid 324; testnet 280 not covered here
 };
 
 const CHAIN_NAMES = {
@@ -86,6 +104,7 @@ module.exports = {
   WHITELIST_CANDIDATES,
   RPC_KEYS,
   CHAIN_NAMES,
+  EXPLORERS,
   OPERATOR_KEYS,
   OPERATOR_TOKENS,
   loadDeployment,

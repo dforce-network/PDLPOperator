@@ -75,9 +75,10 @@ local `MiniMinter.totalMint` debt where a minter exists.
 
 These are small and independent of the bridged Ethereum liquidity.
 
-> **Avalanche whitelist note:** the whitelist candidate `0x75B9a7B6F55754D4d0e952da4bDB55eAeA7dF38e`
-> is **not active** (✗) on the Avalanche operator. The operator wallet is already 0, but if any
-> burn/cleanup is later required there, an address must first be added via `_addToWhitelists`.
+> **Avalanche whitelist note:** the migration-time candidate `0x75B9a7B6…` is **not** the active
+> whitelist user. Transaction tracing (`scripts/whitelist-trace.js`) shows the real whitelisted
+> operator is **`0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75`** (✓, active as of 2026-05). The config
+> in `scripts/config.js` has been corrected accordingly.
 
 ---
 
@@ -116,8 +117,29 @@ upstream of it and are not yet scripted.
 2. **Extend `scripts/status.js`** to natively report FlashVault (`vUSX`) and lending
    (`iUSX`/`viUSX`) underlying balances, so the full reconciliation runs from one command instead
    of the ad-hoc probe used for this report.
-3. **Restore coverage** for zkSync / Conflux / Avalanche (deployment file + RPC URLs).
+3. **Restore coverage** for zkSync (deployment file) and Kava explorer access.
 4. Sequence the Arbitrum FlashVault redemption + bridge-back before the final L1 repay/burn.
+
+---
+
+## 5a. Whitelist user discovery (tx-tracing)
+
+The `Whitelists` contract emits **no events**, so the active whitelist users cannot be queried
+directly. Because operator functions (`deposit`/`withdraw`/`mint`/`depositToCBridge`) are gated by
+`onlyWhitelist`, the `from` of any **successful** transaction to an operator is either a whitelist
+user or the owner. `scripts/whitelist-trace.js` exploits this:
+
+1. fetch the operator's recent txs from a block explorer (Etherscan V2 / Routescan / ConfluxScan),
+2. collect distinct successful senders + their last-seen date,
+3. cross-check each against the live `whitelists(address)` mapping over RPC.
+
+**Why it matters:** the migration-time candidate list in `scripts/config.js` is **stale on some
+chains**. Example — Avalanche: the config listed `0x75B9a7B6…`, but tracing shows the real
+whitelisted operator is `0xDE6D6f23…` (active 2026-05). The config has been corrected. Treat
+`whitelist-trace.js` output, not the static list, as the source of truth before acting.
+
+Verified working: Conflux (owner + `0x655284Be…` ✓), Avalanche (`0xDE6D6f23…` ✓). Etherscan V2
+chains (1/10/56/137/42161) need `ETHERSCAN_KEY` in `.env`; Kava's explorer currently returns 403.
 
 ---
 
