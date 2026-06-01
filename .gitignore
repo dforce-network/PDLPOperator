@@ -116,3 +116,6 @@ cache-zk/
 # Foundry build output
 out/
 foundry.lock
+
+# npm lock (repo uses yarn)
+package-lock.json

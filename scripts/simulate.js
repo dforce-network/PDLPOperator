@@ -3,8 +3,9 @@
 //
 // Full local simulation of the PDLP cleanup flow:
 //   1. Starts an Anvil fork of the target chain
-//   2. Deploys CleanupImpl (minimal OperatorBase subclass with the new approve())
-//   3. Impersonates the proxyAdmin owner (or Timelock) to upgrade each operator proxy
+//   2. Installs the REAL operator impl (e.g. ArbiOperator) by etching its runtime
+//      bytecode via anvil_setCode, then upgrades each proxy to it
+//   3. Impersonates the live proxyAdmin owner (EOA or Timelock) for the upgrade
 //   4. Impersonates the whitelist user to call operator.approve(token)
 //   5. Verifies allowance is max
 //   6. Burns all operator token balance via IMSD(token).burn(operator, balance)
@@ -13,7 +14,7 @@
 //
 // Prerequisites:
 //   - `anvil` in PATH (install: https://getfoundry.sh)
-//   - `npx hardhat compile` already run (needs out/CleanupImpl.sol/CleanupImpl.json)
+//   - `forge build` already run (needs out/<Operator>.sol/<Operator>.json)
 //   - RPC env var set (e.g. BSC_RPC=https://...)
 //
 // Example:
@@ -31,27 +32,26 @@ const {
 
 const ANVIL_PORT = 18545; // use non-standard port to avoid conflicts
 const ANVIL_URL = `http://127.0.0.1:${ANVIL_PORT}`;
-// First default Anvil account — always funded with 10000 ETH
-const DEPLOYER_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
 // ─── Artifact loader ────────────────────────────────────────────────────────
 
-function loadArtifact(contractName) {
-  const searchDirs = [
-    path.join(__dirname, `../out/${contractName}.sol`),
-    path.join(__dirname, `../artifacts/contracts/${contractName}.sol`),
-    path.join(__dirname, `../artifacts/contracts/test/${contractName}.sol`),
-  ];
-  for (const dir of searchDirs) {
-    const file = path.join(dir, `${contractName}.json`);
-    if (fs.existsSync(file)) {
-      return JSON.parse(fs.readFileSync(file, "utf-8"));
-    }
+// Return the runtime (deployed) bytecode of a contract from the Foundry out/ dir.
+// We use runtime bytecode because a proxy never runs the impl constructor — etching
+// the runtime code via anvil_setCode installs exactly what the upgraded proxy executes,
+// and avoids the real operators' constructor arg/validation requirements.
+function loadDeployedBytecode(contractName) {
+  const file = path.join(__dirname, `../out/${contractName}.sol/${contractName}.json`);
+  if (!fs.existsSync(file)) {
+    throw new Error(
+      `Artifact not found for ${contractName} at ${file}. Run 'forge build' first.`
+    );
   }
-  throw new Error(
-    `Artifact not found for ${contractName}. ` +
-    `Run 'forge build' (for out/) or 'npx hardhat compile' (for artifacts/) first.`
-  );
+  const artifact = JSON.parse(fs.readFileSync(file, "utf-8"));
+  const runtime = artifact.deployedBytecode && artifact.deployedBytecode.object;
+  if (!runtime || runtime === "0x") {
+    throw new Error(`No deployedBytecode for ${contractName}`);
+  }
+  return runtime;
 }
 
 // ─── Anvil lifecycle ─────────────────────────────────────────────────────────
@@ -121,14 +121,6 @@ async function simulate(chainId) {
   console.log(`Anvil ready — fork at block ${block}\n`);
 
   try {
-    // ── Deploy CleanupImpl ────────────────────────────────────────────
-    const deployer = new ethers.Wallet(DEPLOYER_KEY, provider);
-    const artifact = loadArtifact("CleanupImpl");
-    const factory = new ethers.ContractFactory(artifact.abi, artifact.bytecode, deployer);
-    process.stdout.write("Deploying CleanupImpl... ");
-    const impl = await (await factory.deploy()).deployed();
-    console.log(`deployed at ${impl.address}`);
-
     // ── ProxyAdmin setup ──────────────────────────────────────────────
     const proxyAdminEntry = deployment.proxyAdmin;
     if (!proxyAdminEntry) throw new Error("No proxyAdmin in deployment");
@@ -138,16 +130,10 @@ async function simulate(chainId) {
       "function upgrade(address proxy, address implementation)",
     ];
     const proxyAdmin = new ethers.Contract(proxyAdminEntry.address, proxyAdminAbi, provider);
-    let proxyAdminOwner = await proxyAdmin.owner();
-
-    // If Timelock owns proxyAdmin, impersonate the Timelock directly (bypasses delay)
-    const timelockEntry = deployment.timeLock || deployment.timelock;
-    if (timelockEntry &&
-        timelockEntry.address.toLowerCase() === proxyAdminOwner.toLowerCase()) {
-      console.log(`ProxyAdmin owned by Timelock — impersonating Timelock to bypass delay`);
-      proxyAdminOwner = timelockEntry.address;
-    }
-
+    // Read the live owner (EOA or Timelock) and impersonate it — pranking the owner
+    // bypasses any Timelock queue delay.
+    const proxyAdminOwner = await proxyAdmin.owner();
+    console.log(`ProxyAdmin owner: ${proxyAdminOwner}`);
     const upgraderSigner = await impersonate(provider, proxyAdminOwner);
 
     // ── Per-operator loop ─────────────────────────────────────────────
@@ -163,14 +149,25 @@ async function simulate(chainId) {
 
     const results = [];
 
+    let implNonce = 0;
     for (const opKey of (OPERATOR_KEYS[chainId] || [])) {
       const opEntry = deployment[opKey];
       if (!opEntry) continue;
       const opAddr = opEntry.address;
 
+      // Build the REAL operator impl: etch its runtime bytecode at a fresh address.
+      const contractName = opEntry.contract; // e.g. "ArbiOperator"
+      const runtime = loadDeployedBytecode(contractName);
+      const implAddr = ethers.utils.getAddress(
+        "0x" + (BigInt("0x1100000000000000000000000000000000000000") + BigInt(implNonce++))
+          .toString(16).padStart(40, "0")
+      );
+      await provider.send("anvil_setCode", [implAddr, runtime]);
+      console.log(`\n[${opKey}] real impl (${contractName}) etched at ${implAddr}`);
+
       // Upgrade proxy
-      process.stdout.write(`\n[${opKey}] Upgrading proxy ${opAddr}... `);
-      await (await proxyAdmin.connect(upgraderSigner).upgrade(opAddr, impl.address)).wait();
+      process.stdout.write(`[${opKey}] Upgrading proxy ${opAddr}... `);
+      await (await proxyAdmin.connect(upgraderSigner).upgrade(opAddr, implAddr)).wait();
       console.log("done");
 
       const operator = new ethers.Contract(opAddr, OPERATOR_ABI, provider);
