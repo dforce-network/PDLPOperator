@@ -45,8 +45,11 @@ local `MiniMinter.totalMint` debt where a minter exists.
 | — Arbitrum operator `iUSX` | 0 |
 | **Optimism** operator wallet | 5,994,343 |
 | — Optimism FlashVault / `iUSX` / `viUSX` | 0 |
-| **Located subtotal** | **~112,261,218** |
-| **Unreconciled gap** | **~9,976,641** |
+| Arbitrum cBridge (operator LP, see §2a) | ~100,528 |
+| Optimism cBridge (operator LP, see §2a) | ~99,001 |
+| Ethereum cBridge (operator LP, see §2a) | ~100,357 |
+| **Located subtotal** | **~112,561,104** |
+| **Unreconciled gap** | **~9,676,755** |
 
 **Key points**
 
@@ -54,10 +57,46 @@ local `MiniMinter.totalMint` debt where a minter exists.
   as 100,100,000 vTokens (`vUSX`). Vault `getCash` and `balanceOf` both equal 100.1M, i.e. no net
   borrow currently drawn against it.
 - The dForce lending-pool holdings are **negligible** (Arbitrum ~300 USX via `viUSX`, Ethereum ~8
-  USX via `iUSX`). The gap is **not** sitting in the lending pools.
-- The **~10M gap** between L1 mint (122.24M) and located L2 funds (112.26M) is currently
-  **unexplained** — candidates: in cBridge transit, held by an external treasury/EOA, or bridged to
-  a chain not covered here (see §4). **This must be traced before cleanup.**
+  USX via `iUSX`); the gap is **not** in the lending pools. cBridge liquidity (§2a) adds only
+  ~0.3M to the bridged reconciliation.
+- After accounting for cBridge, a **~9.68M gap** between L1 mint (122.24M) and located funds
+  (~112.56M) remains **unexplained** — candidates: in cBridge cross-chain transit, held by an
+  external treasury/EOA, or bridged to a chain not covered here (see §4). **This must be traced
+  before cleanup.**
+
+---
+
+## 2a. cBridge (Celer) liquidity
+
+The operators provide USX liquidity to Celer's cBridge: `depositToCBridge(amount)` does
+`vault.borrow(amount)` (mints USX, ↑`totalMint`) then `cBridge.addLiquidity(USX, amount)`. So the
+operator is an LP, and its parked liquidity is `totalMint` that has been deployed to the bridge and
+not yet recovered. Recovery is `withdrawFromCBridge` (SGN-signed withdraw) → `vault.repayBorrow`.
+
+`USX.balanceOf(cBridge)` per chain (the bridge's total USX; for a niche token like USX the LPs are
+realistically just these operators, so this approximates the operator's position):
+
+| Chain | cBridge | USX in bridge |
+|---|---|---:|
+| Ethereum (1) | `0x5427FEFA…` | ~100,357 |
+| Optimism (10) | `0x9D39Fc62…` | ~99,001 |
+| BSC (56) | `0xdd90E5E8…` | ~100,197 |
+| Arbitrum (42161) | `0x1619DE6B…` | ~100,528 |
+| Polygon (137) | `0x88DCDC47…` | ~746 |
+| Kava (2222) | `0xb51541df…` | ~628 |
+| Avalanche (43114) | `0xef3c714c…` | ~27 |
+| Conflux (1030) | `0x841ce48f…` | ~961 |
+| **Total** | | **~402,445** |
+
+> **Caveats.** These are **total** bridge balances (all LPs + any in-transit funds), an upper bound
+> on operator-owned liquidity. A precise per-operator LP figure needs Celer SGN data or
+> `LiquidityAdded`/withdraw event reconstruction — not feasible here because the free RPC tier caps
+> `eth_getLogs` to a 10-block range. The uniform ~100K on ETH/OP/BSC/Arbitrum matches the
+> migration scripts' standard `depositToCBridge(100000)`, supporting the operator-LP reading.
+
+**Cleanup impact:** the ~100K parked on each major chain is recovered via `withdrawFromCBridge`
+(needs an SGN withdraw message from Celer), after which `repayBorrow`/`repay()` retires it. It's a
+minor slice (~0.4M total) of the cleanup, but should be drained as part of the wind-down.
 
 ---
 
@@ -133,13 +172,16 @@ minters (BSC/Polygon/Kava/Conflux) are retired independently with `repay()` on t
 
 ### Recommended next actions
 
-1. **Trace the ~10M gap** (cBridge balances, treasury/EOA holders, uncovered chains).
-2. **Extend `scripts/status.js`** to natively report FlashVault (`vUSX`) and lending
-   (`iUSX`/`viUSX`) underlying balances, so the full reconciliation runs from one command instead
-   of the ad-hoc probe used for this report.
+1. **Trace the remaining ~9.68M gap** (cBridge cross-chain in-transit, treasury/EOA holders,
+   uncovered chains). cBridge LP balances (§2a) are now accounted for (~0.4M).
+2. **Extend `scripts/status.js`** to natively report FlashVault (`vUSX`), lending (`iUSX`/`viUSX`),
+   and cBridge (`USX.balanceOf(cBridge)`) balances, so the full reconciliation runs from one command
+   instead of the ad-hoc probes used for this report.
 3. **Restore coverage** for zkSync (deployment file) and Kava explorer access.
 4. **Script the Arbitrum FlashVault redemption + bridge-back** (step 1–2 above); the L1 `repay`
    step is already simulated.
+5. **Drain cBridge LP** on each chain via `withdrawFromCBridge` (needs a Celer SGN withdraw message),
+   then `repay()` — retires the ~100K parked on each major chain.
 
 ---
 
@@ -188,15 +230,15 @@ keyless ConfluxScan. Kava's explorer returns 403 — for those, the known operat
 
 ## 6. Reference — operator & key contract addresses
 
-| Chain | Operator (proxy) | FlashVault `vUSX` | iUSX |
+| Chain | Operator (proxy) | FlashVault `vUSX` | cBridge |
 |---|---|---|---|
-| Ethereum (1) | `0x5268b3c4afb0860D365a093C184985FCFcb65234` | — | `0x1AdC34Af68e970a93062b67344269fD341979eb0` |
-| Optimism (10) | `0x70a35414FaD53752C9352401BE211779EC413BD4` | `0x3EA2c9daa2aB26dbc0852ea653f99110c335f10a` | `0x7e7e1d8757b241Aa6791c089314604027544Ce43` |
-| Arbitrum (42161) | `0x1D2eB423bC723DA7f927CA21B56A4C22aF6C72B4` | `0x9E8B68E17441413b26C2f18e741EAba69894767c` | `0x0385F851060c09A552F1A28Ea3f612660256cBAA` |
-| BSC (56) | `0x6c69B26fBfdDA4d38e3aE2E32dCE0AB66Ba2C3c9` (USX) / `0xf0D29c81d3ECdf0CeD8f7cB0B77E1907575fD30c` (EUX) | — | — |
-| Polygon (137) | `0x99E8352D079326Bc431633a61954F713AafE372C` (USX) / `0xC9d1cbc45dd3e86E98067B7eb279C13F7B77C627` (EUX) | — | — |
-| Kava (2222) | `0xcA09A0a386ac213703e7F70f0b468dde39f026BC` | — | — |
-| Conflux eSpace (1030) | `0x8d717271b1A0aE97fcdF7D0a21Fa3DE4334b1EFd` | — | — |
-| Avalanche (43114) | `0x2610CC2f20F9F3c1B180b7e8836C8c222a540cc8` | — | — |
+| Ethereum (1) | `0x5268b3c4afb0860D365a093C184985FCFcb65234` | — | `0x5427FEFA711Eff984124bFBB1AB6fbf5E3DA1820` |
+| Optimism (10) | `0x70a35414FaD53752C9352401BE211779EC413BD4` | `0x3EA2c9daa2aB26dbc0852ea653f99110c335f10a` | `0x9D39Fc627A6d9d9F8C831c16995b209548cc3401` |
+| Arbitrum (42161) | `0x1D2eB423bC723DA7f927CA21B56A4C22aF6C72B4` | `0x9E8B68E17441413b26C2f18e741EAba69894767c` | `0x1619DE6B6B20eD217a58d00f37B9d47C7663feca` |
+| BSC (56) | `0x6c69B26fBfdDA4d38e3aE2E32dCE0AB66Ba2C3c9` (USX) / `0xf0D29c81d3ECdf0CeD8f7cB0B77E1907575fD30c` (EUX) | — | `0xdd90E5E87A2081Dcf0391920868eBc2FFB81a1aF` |
+| Polygon (137) | `0x99E8352D079326Bc431633a61954F713AafE372C` (USX) / `0xC9d1cbc45dd3e86E98067B7eb279C13F7B77C627` (EUX) | — | `0x88DCDC47D2f83a99CF0000FDF667A468bB958a78` |
+| Kava (2222) | `0xcA09A0a386ac213703e7F70f0b468dde39f026BC` | — | `0xb51541df05DE07be38dcfc4a80c05389A54502BB` |
+| Conflux eSpace (1030) | `0x8d717271b1A0aE97fcdF7D0a21Fa3DE4334b1EFd` | — | `0x841ce48f9446c8e281d3f1444cb859b4a6d0738c` |
+| Avalanche (43114) | `0x2610CC2f20F9F3c1B180b7e8836C8c222a540cc8` | — | `0xef3c714c9425a8F3697A9C969Dc1af30ba82e5d4` |
 
 USX token addresses and whitelist candidates per chain are in `scripts/config.js`.
