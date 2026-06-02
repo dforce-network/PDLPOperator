@@ -98,18 +98,38 @@ To include this: commit the zkSync deployment file, then re-run `scripts/status.
 ## 5. Implications for cleanup
 
 Burning only the operator-held **wallet** balances is **not** sufficient to zero out the system.
-The dominant position (100.1M on Arbitrum) is locked in the FlashVault as vTokens. The end-to-end
-cleanup for the bridged liquidity is:
+Two things matter: (a) the dominant position (100.1M on Arbitrum) is locked in the FlashVault as
+vTokens, and (b) `MiniMinter.totalMint` is **separate accounting** from the token supply.
 
-1. **L2** — operator redeems its FlashVault vTokens (and exits any lending positions) so the
-   underlying USX returns to the operator wallet.
-2. **L2** — bridge that USX back to the Ethereum operator (cBridge / native bridge).
-3. **L1** — `MiniMinter.repayBorrow()` burns it, reducing `totalMint` toward 0.
+### Two cleanup primitives (both added on this branch)
 
-The `approve(address)` + `IMSD.burn(operator, amount)` flow added on this branch handles the
-**final burn-from-operator step** (and any chain where USX is already sitting in the operator
-wallet, e.g. Optimism's 5.99M, Polygon's 172K). The redeem-from-vault and bridge-back steps are
-upstream of it and are not yet scripted.
+| Primitive | What it does | Use when |
+|---|---|---|
+| `repay(amount)` (`VaultBase`) | calls `vault.repayBorrow` → burns operator USX **and** decrements `totalMint` | minter chains (ETH, BSC, Polygon, Kava, Conflux) — **preferred** |
+| `approve(token)` + `IMSD.burn(operator)` | burns the token only; leaves `totalMint` **stale** | non-minter chains (Arbitrum/OP), or to mop up a remainder / non-USX tokens |
+
+Fork-proven (`test/RepayBorrowExplore.t.sol`): a direct burn leaves mainnet `totalMint` at
+122,237,859 (stale), while `repay()` reduces it. So **minter chains must use `repay()`**, not a
+plain burn, or the minter will permanently over-state outstanding debt.
+
+When the operator holds **more** USX than `totalMint` (e.g. Polygon: 172,824 held vs 144,030
+`totalMint`), the flow is `repay(min(balance, totalMint))` then `approve`+burn the remainder.
+`scripts/simulate.js` does exactly this (Polygon fork: repay 144,030 → `totalMint` 0, then burn
+28,794 → balance 0).
+
+### End-to-end sequence for the bridged ~122M (Arbitrum example)
+
+The 100.1M on Arbitrum is in the FlashVault, and the `totalMint` it backs lives on **Ethereum**:
+
+1. **Arbitrum** — operator redeems FlashVault vTokens → underlying USX returns to the operator
+   wallet (use the operator's `withdraw` / flash-redeem path; exit any lending positions too).
+2. **Arbitrum** — bridge that USX back to the Ethereum operator (cBridge / native bridge) via the
+   existing `depositToCBridge` / bridge functions.
+3. **Ethereum** — once the USX lands in the L1 operator, call `repay(amount)` in tranches →
+   `MiniMinter.repayBorrow` burns it and drives `totalMint` (122.2M) toward 0.
+
+Optimism's 5.99M and any other wallet-idle balances feed the same L1 `repay`. Per-chain local
+minters (BSC/Polygon/Kava/Conflux) are retired independently with `repay()` on their own chain.
 
 ### Recommended next actions
 
@@ -118,7 +138,8 @@ upstream of it and are not yet scripted.
    (`iUSX`/`viUSX`) underlying balances, so the full reconciliation runs from one command instead
    of the ad-hoc probe used for this report.
 3. **Restore coverage** for zkSync (deployment file) and Kava explorer access.
-4. Sequence the Arbitrum FlashVault redemption + bridge-back before the final L1 repay/burn.
+4. **Script the Arbitrum FlashVault redemption + bridge-back** (step 1–2 above); the L1 `repay`
+   step is already simulated.
 
 ---
 
