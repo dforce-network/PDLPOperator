@@ -15,6 +15,13 @@ const ERC20_ABI = [
 const OPERATOR_ABI = [
   "function owner() view returns (address)",
   "function whitelists(address) view returns (bool)",
+  "function flashVault() view returns (address)",
+  "function cBridge() view returns (address)",
+  "function getProviders() view returns (address[])",
+];
+const VTOKEN_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function exchangeRateStored() view returns (uint256)",
 ];
 const PROXY_ADMIN_ABI = [
   "function owner() view returns (address)",
@@ -23,6 +30,20 @@ const MINTER_ABI = [
   "function totalMint() view returns (uint256)",
   "function owner() view returns (address)",
 ];
+
+const WAD = ethers.BigNumber.from("1000000000000000000");
+const fmtUnits = (x) =>
+  Number(ethers.utils.formatEther(x)).toLocaleString("en-US", { maximumFractionDigits: 2 });
+
+// Optionally read a contract address from the operator (returns null if absent).
+async function readAddr(operator, fn) {
+  try {
+    const a = await operator[fn]();
+    return a && a !== ethers.constants.AddressZero ? a : null;
+  } catch (_) {
+    return null;
+  }
+}
 
 // Find MiniMinter proxy entries in a deployment (exclude the shared impl).
 function findMinterKeys(deployment) {
@@ -74,19 +95,62 @@ async function checkChain(chainId) {
     console.log(`\n  ${opKey}: ${opAddr}`);
     console.log(`    owner: ${owner}`);
 
+    // Locations USX can sit (read straight from the operator):
+    //   wallet · FlashVault (vUSX) · cBridge LP · lending providers
+    const flashVaultAddr = await readAddr(operator, "flashVault");
+    const cBridgeAddr = await readAddr(operator, "cBridge");
+    let providerCount = 0;
+    try { providerCount = (await operator.getProviders()).length; } catch (_) {}
+
+    let located = ethers.constants.Zero; // operator-owned USX (excludes shared cBridge pool)
+
     for (const sym of (OPERATOR_TOKENS[opKey] || [])) {
       const tokenAddr = TOKENS[chainId] && TOKENS[chainId][sym];
       if (!tokenAddr) continue;
       const token = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
+
+      // wallet
       try {
         const bal = await token.balanceOf(opAddr);
-        const dec = await token.decimals();
-        const fmt = ethers.utils.formatUnits(bal, dec);
-        console.log(`    ${sym} balance: ${Number(fmt).toLocaleString("en-US", { maximumFractionDigits: 4 })} ${sym}  (raw: ${bal.toString()})`);
+        console.log(`    ${sym} wallet:    ${fmtUnits(bal)} ${sym}  (raw: ${bal.toString()})`);
+        located = located.add(bal);
       } catch (e) {
-        console.log(`    ${sym} balance: ERROR — ${e.message}`);
+        console.log(`    ${sym} wallet:    ERROR — ${e.message}`);
+      }
+
+      // FlashVault (vUSX): operator's vToken position -> underlying USX
+      if (flashVaultAddr) {
+        try {
+          const v = new ethers.Contract(flashVaultAddr, VTOKEN_ABI, provider);
+          const vbal = await v.balanceOf(opAddr);
+          const rate = await v.exchangeRateStored();
+          const underlying = vbal.mul(rate).div(WAD);
+          console.log(`    ${sym} FlashVault:${fmtUnits(underlying)} ${sym}  (vToken ${flashVaultAddr})`);
+          located = located.add(underlying);
+        } catch (e) {
+          console.log(`    ${sym} FlashVault:ERROR — ${e.message.slice(0, 50)}`);
+        }
       }
     }
+
+    // cBridge LP (Celer pool total USX on this chain; ~operator LP for USX)
+    if (cBridgeAddr) {
+      const usxAddr = TOKENS[chainId] && TOKENS[chainId].USX;
+      if (usxAddr) {
+        try {
+          const usx = new ethers.Contract(usxAddr, ERC20_ABI, provider);
+          const cb = await usx.balanceOf(cBridgeAddr);
+          console.log(`    cBridge LP: ${fmtUnits(cb)} USX  (pool ${cBridgeAddr}; total, ~operator)`);
+        } catch (e) {
+          console.log(`    cBridge LP: ERROR — ${e.message.slice(0, 50)}`);
+        }
+      }
+    }
+
+    if (providerCount > 0) {
+      console.log(`    lending:    ${providerCount} provider(s) (positions probed separately; negligible)`);
+    }
+    console.log(`    -> operator-owned USX (wallet + FlashVault): ${fmtUnits(located)}`);
 
     const candidates = WHITELIST_CANDIDATES[chainId] || [];
     if (candidates.length > 0) {

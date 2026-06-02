@@ -15,7 +15,9 @@ const TOKENS = {
 };
 
 const WHITELIST_CANDIDATES = {
-  1:     ["0x18c30D9569fEb3ea3644573b013D329dD9fd01Af", "0xcC27B0206645aDbE5b5C8d212c2a98574090B68F"],
+  // Ethereum: tx-trace shows the active whitelist user is 0xDE6D... (the migration-era
+  // 0x18c30D / 0xcC27B0 are not currently whitelisted).
+  1:     ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75", "0x18c30D9569fEb3ea3644573b013D329dD9fd01Af", "0xcC27B0206645aDbE5b5C8d212c2a98574090B68F"],
   56:    ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75"],
   10:    ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75"],
   42161: ["0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75"],
