@@ -42,47 +42,59 @@ There are **two independent liquidity systems**, and they must be cleaned up dif
 
 ---
 
-## 2. Current liquidity status
+## 2. Liquidity ledger — sources & destinations
 
-### A. Bridged system — reconciling the 122.2M
+USX only ever enters circulation at a **source** (a `MiniMinter.borrow()`), and ends up at a
+**destination** (operator wallet / FlashVault / cBridge LP / lending). Cleanup = move every
+destination balance back and `repay()` it at its source, driving `totalMint` → 0. Each row below is
+read by `scripts/status.js`.
 
-| Location | USX |
-|---|---:|
-| **Ethereum** `MiniMinter.totalMint` (debt to retire) | **122,237,859** |
-| Ethereum operator wallet | 0 |
-| Ethereum cBridge LP | ~100,357 |
-| Ethereum lending (`iUSX`/`qUSX`) | ~8 |
-| **Arbitrum** operator wallet | 6,166,567 |
-| Arbitrum **FlashVault** (`vUSX`, 100.1M vTokens; vault cash = 100.1M) | 100,100,000 |
-| Arbitrum cBridge LP | ~100,528 |
-| Arbitrum lending (`viUSX`) | ~300 |
-| **Optimism** operator wallet | 5,994,343 |
-| Optimism cBridge LP | ~99,001 |
-| **Located total** | **~112,561,104** |
-| **Unreconciled gap** | **~9,676,755** |
+### 2A. Sources (the only places USX is minted)
 
-- The dominant position is **100.1M locked in the Arbitrum FlashVault** (operator holds 100.1M
-  `vUSX`; `getCash` = `balanceOf` = 100.1M, no net borrow drawn).
-- cBridge holds the operators' LP (~100K each on ETH/OP/Arbitrum — matches the migration scripts'
-  `depositToCBridge(100000)`). Lending positions are negligible.
-- **~9.68M is still unlocated.** Because Arb/OP USX is *only* bridged in, the gap must be either (a)
-  cBridge value mid-transit / on a bridge contract, (b) held by an external treasury/EOA, or (c) an
-  over-statement in `totalMint` from a historical borrow never repaid. **Trace before final repay.**
+| Source chain | MiniMinter | `totalMint` (USX to retire) | Feeds |
+|---|---|---:|---|
+| **Ethereum (1)** | `0xA7A0…3B4` | **122,237,859** | Ethereum + **Arbitrum + Optimism** (bridged) |
+| BSC (56) | `0xE8db…465` | 232,406 | BSC only (local) |
+| Polygon (137) | `0xc617…E78` | 144,030 | Polygon only (local) |
+| Avalanche (43114) | `0x2E3D…D1C` | 3,973 | Avalanche only (local) |
+| Kava (2222) | `0x1449…471` | 1,993 | Kava only (local) |
+| Conflux (1030) | `0xB5b3…15A` | 91 | Conflux only (local) |
+| BSC EUX / Polygon EUX | — | 1,000 each | wound down |
 
-### B. Local-minter system (independent per chain)
+### 2B. Destinations of the Ethereum source (the 122.2M)
 
-| Chain | Operator wallet | `totalMint` | Active whitelist user |
-|---|---:|---:|---|
-| BSC USX | 0 | 232,406 | `0xDE6D6f23…` |
-| BSC EUX | 0 | 1,000 | none (wound down) |
-| Polygon USX | 172,824 | 144,030 | `0xDE6D6f23…` |
-| Polygon EUX | 0 | 1,000 | none |
-| Kava USX | 0 | 1,993 | `0xDE6D6f23…` |
-| Conflux USX | 3,623 | 91 | `0x655284Be…` |
-| Avalanche USX | 0 | 3,973 | `0xDE6D6f23…` |
+Arbitrum and Optimism have **no minter** — every USX there is a *destination* bridged from the
+Ethereum source. This ledger must sum back to `totalMint`:
 
-> Polygon holds **more** USX (172,824) than its `totalMint` (144,030): repay 144,030 to zero the
-> minter, then burn the 28,794 excess.
+| Dest chain | Location | Token / mechanism | USX |
+|---|---|---|---:|
+| Ethereum | operator wallet | USX | 0 |
+| Ethereum | cBridge LP | `depositToCBridge` | ~100,357 |
+| Ethereum | lending | `iUSX` / `qUSX` | ~8 |
+| **Arbitrum** | **FlashVault** | `vUSX` (100.1M vTokens, cash 100.1M) | **100,100,000** |
+| Arbitrum | operator wallet | USX (bridged in) | 6,166,567 |
+| Arbitrum | cBridge LP | `depositToCBridge` | ~100,528 |
+| Arbitrum | lending | `viUSX` | ~300 |
+| **Optimism** | operator wallet | USX (bridged in) | 5,994,343 |
+| Optimism | cBridge LP | `depositToCBridge` | ~99,001 |
+| — | **unaccounted (gap)** | in-transit / external (trace) | **~9,676,755** |
+| | **Total (= source `totalMint`)** | | **122,237,859** |
+
+- Dominant position: **100.1M in the Arbitrum FlashVault**. The rest is wallet balances + ~0.3M
+  cBridge LP (the uniform ~100K per chain matches the migration `depositToCBridge(100000)`).
+- **~9.68M unaccounted.** Since Arb/OP USX is *only* bridged in, the gap is most likely cBridge
+  value mid-transit, an external treasury/EOA, or a historical borrow never repaid. **Trace before
+  the final L1 repay.**
+
+### 2C. Destinations of the local sources
+
+| Source chain | `totalMint` | operator wallet | cBridge LP | Note |
+|---|---:|---:|---:|---|
+| BSC USX | 232,406 | 0 | ~100,197 | remainder in-transit / already redeemed — reconcile |
+| Polygon USX | 144,030 | 172,824 | ~746 | wallet **>** `totalMint`: repay 144,030, burn 28,794 excess |
+| Kava USX | 1,993 | 0 | ~628 | |
+| Conflux USX | 91 | 3,623 | ~961 | wallet > `totalMint` |
+| Avalanche USX | 3,973 | 0 | ~27 | |
 
 ### Whitelist user (who executes cleanup)
 
