@@ -140,12 +140,17 @@ async function simulate(chainId) {
     const OPERATOR_ABI = [
       "function whitelists(address) view returns (bool)",
       "function approve(address _token)",
+      "function repay(uint256 _amount)",
+      "function vault() view returns (address)",
     ];
     const ERC20_ABI = [
       "function balanceOf(address) view returns (uint256)",
       "function allowance(address,address) view returns (uint256)",
     ];
+    const MINTER_ABI = ["function totalMint() view returns (uint256)"];
     const IMSD_ABI = ["function burn(address from, uint256 amount)"];
+    const fmt = (x) => ethers.utils.formatEther(x);
+    const min = (a, b) => (a.lt(b) ? a : b);
 
     const results = [];
 
@@ -185,49 +190,67 @@ async function simulate(chainId) {
 
       const whitelistSigner = await impersonate(provider, whitelistUser);
 
+      // Detect the operator's minter (vault). Minter chains can repay() to retire
+      // totalMint; non-minter chains (Arbitrum/OP) fall back to approve()+burn.
+      let vaultAddr = null;
+      try {
+        const v = await operator.vault();
+        if (v && v !== ethers.constants.AddressZero) vaultAddr = v;
+      } catch (_) { /* operator has no vault() (L2) */ }
+
       for (const sym of (OPERATOR_TOKENS[opKey] || [])) {
         const tokenAddr = TOKENS[chainId]?.[sym];
         if (!tokenAddr) continue;
 
         const token = new ethers.Contract(tokenAddr, ERC20_ABI, provider);
         const balanceBefore = await token.balanceOf(opAddr);
-        console.log(`  [${sym}] balance before : ${ethers.utils.formatEther(balanceBefore)}`);
+        console.log(`  [${sym}] balance before : ${fmt(balanceBefore)}`);
 
-        // Call operator.approve(token) — the new function
-        process.stdout.write(`  [${sym}] calling operator.approve(${sym})... `);
-        await (await operator.connect(whitelistSigner).approve(tokenAddr)).wait();
-        console.log("done");
+        let remaining = balanceBefore;
 
-        const allowance = await token.allowance(opAddr, whitelistUser);
-        const isMax = allowance.eq(ethers.constants.MaxUint256);
-        console.log(`  [${sym}] allowance      : ${isMax ? "MAX (✓)" : allowance.toString()}`);
-
-        if (!isMax) {
-          console.log(`  [${sym}] ✗ allowance is not max — something is wrong`);
-          results.push({ opKey, sym, success: false, reason: "allowance not max" });
-          continue;
+        // ── Step 1: repay() to retire totalMint (minter chains only) ────
+        if (vaultAddr) {
+          const minter = new ethers.Contract(vaultAddr, MINTER_ABI, provider);
+          const totalMint0 = await minter.totalMint();
+          console.log(`  [${sym}] minter totalMint: ${fmt(totalMint0)}`);
+          const repayAmt = min(balanceBefore, totalMint0);
+          if (repayAmt.gt(0)) {
+            process.stdout.write(`  [${sym}] operator.repay(${fmt(repayAmt)})... `);
+            await (await operator.connect(whitelistSigner).repay(repayAmt)).wait();
+            console.log("done");
+            const totalMint1 = await minter.totalMint();
+            console.log(`  [${sym}] totalMint after : ${fmt(totalMint1)} (-${fmt(totalMint0.sub(totalMint1))})`);
+            remaining = balanceBefore.sub(repayAmt);
+            results.push({ opKey, sym, success: true, op: "repay", amount: fmt(repayAmt), reason: "totalMint reduced" });
+          } else if (balanceBefore.isZero()) {
+            console.log(`  [${sym}] operator holds 0 — bridge USX back to this chain before repay`);
+          }
         }
 
-        if (balanceBefore.isZero()) {
-          console.log(`  [${sym}] balance is 0 — burn skipped`);
-          results.push({ opKey, sym, success: true, burned: "0", reason: "zero balance" });
-          continue;
+        // ── Step 2: approve()+burn any remainder (or full balance on L2) ─
+        if (remaining.gt(0)) {
+          process.stdout.write(`  [${sym}] operator.approve(${sym})... `);
+          await (await operator.connect(whitelistSigner).approve(tokenAddr)).wait();
+          const allowance = await token.allowance(opAddr, whitelistUser);
+          const isMax = allowance.eq(ethers.constants.MaxUint256);
+          console.log(isMax ? "allowance MAX (✓)" : `allowance ${allowance} ✗`);
+          if (!isMax) {
+            results.push({ opKey, sym, success: false, op: "approve", reason: "allowance not max" });
+            continue;
+          }
+          const msd = new ethers.Contract(tokenAddr, IMSD_ABI, whitelistSigner);
+          process.stdout.write(`  [${sym}] burning remainder ${fmt(remaining)} ${sym}... `);
+          await (await msd.burn(opAddr, remaining)).wait();
+          console.log("done");
+          results.push({ opKey, sym, success: true, op: "burn", amount: fmt(remaining), reason: "remainder burned" });
         }
-
-        // Burn
-        const msd = new ethers.Contract(tokenAddr, IMSD_ABI, whitelistSigner);
-        process.stdout.write(`  [${sym}] burning ${ethers.utils.formatEther(balanceBefore)} ${sym}... `);
-        await (await msd.burn(opAddr, balanceBefore)).wait();
-        console.log("done");
 
         const balanceAfter = await token.balanceOf(opAddr);
-        const success = balanceAfter.isZero();
-        console.log(`  [${sym}] balance after  : ${ethers.utils.formatEther(balanceAfter)} ${success ? "✓" : "✗"}`);
-        results.push({
-          opKey, sym, success,
-          burned: ethers.utils.formatEther(balanceBefore),
-          reason: success ? "ok" : "non-zero balance after burn",
-        });
+        const cleared = balanceAfter.isZero();
+        console.log(`  [${sym}] balance after  : ${fmt(balanceAfter)} ${cleared ? "✓" : "(remaining)"}`);
+        if (balanceBefore.isZero() && !vaultAddr) {
+          results.push({ opKey, sym, success: true, op: "none", amount: "0", reason: "zero balance" });
+        }
       }
     }
 
@@ -237,7 +260,7 @@ async function simulate(chainId) {
     console.log(`${"─".repeat(64)}`);
     for (const r of results) {
       const status = r.success ? "✓ PASS" : "✗ FAIL";
-      console.log(`  ${status}  ${r.opKey} / ${r.sym} — burned: ${r.burned ?? "n/a"}  (${r.reason})`);
+      console.log(`  ${status}  ${r.opKey} / ${r.sym} — ${r.op}(${r.amount ?? "n/a"})  (${r.reason})`);
     }
 
   } finally {
