@@ -29,6 +29,16 @@ interface IMSD {
     function burn(address from, uint256 amount) external;
 }
 
+interface IProxyAdmin {
+    function upgrade(address proxy, address implementation) external;
+    function owner() external view returns (address);
+}
+
+interface IOperatorRepay {
+    function repay(uint256 amount) external;
+    function whitelists(address) external view returns (bool);
+}
+
 contract RepayBorrowExploreTest is Test {
     // Ethereum mainnet PDLP deployment
     address constant MINTER   = 0xA7A084538DE04d808f20C785762934Dd5dA7b3B4; // pdlpMiniMinter
@@ -78,6 +88,44 @@ contract RepayBorrowExploreTest is Test {
         vm.expectRevert(); // onlyOwner
         IMiniMinter(MINTER).repayBorrow(1 ether);
         emit log_string("repayBorrow correctly reverts for non-owner");
+    }
+
+    // ── Full E2E: upgrade to real operator, whitelist user calls repay() ─
+    // Proves the new VaultBase.repay() passthrough cleans totalMint end-to-end:
+    // upgrade the proxy to the real EthereumOperator (now carrying repay()),
+    // fund the operator, then the whitelisted user repays — burning USX and
+    // reducing totalMint, with no operator-impersonation needed.
+    function testOperatorRepayViaUpgrade() public {
+        if (!_fork()) return;
+
+        address proxyAdminAddr = 0x4FF0455bcfBB5886607c078E0F43Efb5DE34DeF4;
+        address whitelistUser = 0xDE6D6f23AabBdC9469C8907eCE7c379F98e4Cb75;
+
+        // upgrade proxy -> real EthereumOperator runtime (carries the new repay())
+        bytes memory runtime = vm.getDeployedCode("EthereumOperator.sol:EthereumOperator");
+        address newImpl = makeAddr("ethOperatorImpl");
+        vm.etch(newImpl, runtime);
+
+        IProxyAdmin proxyAdmin = IProxyAdmin(proxyAdminAddr);
+        vm.prank(proxyAdmin.owner());
+        proxyAdmin.upgrade(OPERATOR, newImpl);
+
+        assertTrue(IOperatorRepay(OPERATOR).whitelists(whitelistUser), "user not whitelisted");
+
+        uint256 totalMint0 = IMiniMinter(MINTER).totalMint();
+        uint256 amount = 5_000_000 ether;
+        deal(USX, OPERATOR, amount);
+        uint256 supply0 = IERC20(USX).totalSupply();
+
+        vm.prank(whitelistUser);
+        IOperatorRepay(OPERATOR).repay(amount);
+
+        assertEq(IMiniMinter(MINTER).totalMint(), totalMint0 - amount, "totalMint not reduced");
+        assertEq(IERC20(USX).balanceOf(OPERATOR), 0, "operator USX not burned");
+        assertEq(IERC20(USX).totalSupply(), supply0 - amount, "supply not reduced");
+        emit log_named_uint("totalMint before", totalMint0);
+        emit log_named_uint("totalMint after ", IMiniMinter(MINTER).totalMint());
+        emit log_string("operator.repay() via whitelist user: burned USX + reduced totalMint");
     }
 
     // ── Path B (contrast): direct burn leaves totalMint STALE ───────────
