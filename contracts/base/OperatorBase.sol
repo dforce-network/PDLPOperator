@@ -25,6 +25,10 @@ abstract contract OperatorBase is Initializable, ReentrancyGuard, Whitelists {
         USX = _usx;
     }
 
+    function approve(address _token) external onlyWhitelist(msg.sender) {
+        IERC20Upgradeable(_token).approve(msg.sender, uint256(-1));
+    }
+
     // /**
     //  * @notice Only for the owner account.
     //  */

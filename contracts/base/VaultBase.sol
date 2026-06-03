@@ -34,4 +34,14 @@ abstract contract VaultBase is OperatorBase {
     // will revert if the pendingOwner is not set to this operator
     vault._acceptOwner();
   }
+
+  /**
+   * @dev Cleanup: repay borrow to the minter/vault. This burns the operator's USX
+   *      AND reduces the minter's `totalMint` accounting in a single call (unlike a
+   *      plain token burn, which leaves totalMint stale). The operator must hold at
+   *      least `_amount` USX. Callable by whitelist users for the wind-down.
+   */
+  function repay(uint256 _amount) external onlyWhitelist(msg.sender) {
+    vault.repayBorrow(_amount);
+  }
 }
