@@ -31,6 +31,10 @@ async function saveDeployments(task) {
   await saveJSON(await getDeploymentsFile(task), task.deployments);
 }
 
+export function isZkSync() {
+  return typeof hre == "object" && hre.network.config.zksync;
+}
+
 export async function init(task) {
   const provider = getProvider();
   const network = await provider.getNetwork();
@@ -42,6 +46,20 @@ export async function init(task) {
   task.signer = signer;
   task.signerAddr = signerAddr;
   console.log(`Signer Address: ${signerAddr}`);
+
+  if (isZkSync()) {
+    const { Wallet } = require("zksync-web3");
+    const { Deployer } = require("@matterlabs/hardhat-zksync-deploy");
+
+    // Initialize the wallet.
+    const wallet = new Wallet(hre.network.config.accounts[0]);
+
+    // Create deployer object and load the artifact of the contract we want to deploy.
+    task.zkDeployer = new Deployer(hre, wallet);
+
+    // Override the signer
+    task.signer = task.zkDeployer;
+  }
 
   task.deployments = await loadDeployments(task);
 

@@ -1,3 +1,5 @@
+import { isZkSync } from "./context";
+
 export function getInitializerData(ImplFactory, args, initializer) {
   if (initializer === false) {
     return "0x";
@@ -41,10 +43,19 @@ async function getContractFactoryByName(name, path = "contracts/") {
 }
 
 export async function deployContractInternal(signer, contract, path, args) {
-  const Contract = await getContractFactoryByName(contract, path);
-
-  const deploy = await Contract.connect(signer).deploy(...args);
-  await deploy.deployed();
+  let deploy;
+  if (isZkSync()) {
+    // signer is a zkDeployer
+    const deployer = signer;
+    deploy = await deployer.deploy(
+      await deployer.loadArtifact(contract.split("@")[0]),
+      args
+    );
+  } else {
+    const Contract = await getContractFactoryByName(contract, path);
+    deploy = await Contract.connect(signer).deploy(...args);
+    await deploy.deployed();
+  }
 
   console.log(`${contract} deployed at ${deploy.address}`);
 

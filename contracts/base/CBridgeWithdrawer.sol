@@ -49,17 +49,17 @@ abstract contract CBridgeWithdrawer is OperatorBase {
     }
 
     function requestWithdrawFromCBridge(
+        address _receiver,
+        uint64 _toChain,
         uint64[] calldata _fromChains,
         address[] calldata _tokens,
         uint32[] calldata _ratios,
         uint32[] calldata _slippages
     ) external nonReentrant onlyWhitelist(msg.sender) {
-        uint64 _chainId = uint64(_getChainId());
-
         withdrawBox.withdraw(
             withdrawNonce,
-            address(this),
-            _chainId,
+            _receiver,
+            _toChain,
             _fromChains,
             _tokens,
             _ratios,

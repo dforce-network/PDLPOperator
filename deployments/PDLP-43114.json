@@ -27,10 +27,15 @@
     "path": "contracts/",
     "address": "0x1EE116B869eCc7cd13C629a8a2Ae39Fa361265CF"
   },
-  "PolyOperatorImpl": {
+  "PolyOperatorImpl___": {
     "contract": "PolyOperator",
     "path": "contracts/",
     "address": "0xC5b1EC605738eF73a4EFc562274c1c0b6609cF59"
+  },
+  "PolyOperatorImpl": {
+    "contract": "PolyOperator",
+    "path": "contracts/",
+    "address": "0xD037c36dbc81a8890728D850E080e38F6EeB95EF"
   },
   "polyOperatorUSX": {
     "contract": "PolyOperator",

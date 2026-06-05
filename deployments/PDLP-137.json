@@ -21,13 +21,17 @@
     "contract": "PolyOperator",
     "address": "0x0A6941Ef5578FdE91db5C84561eE4B4aE5C20cdd"
   },
-  "PolyOperatorImpl": {
+  "PolyOperatorImpl__": {
     "contract": "PolyOperator",
     "address": "0x197CE4142ea7B327fEaafe37827dAfB6041816F7"
   },
-  "PolyOperatorImpl__": {
+  "PolyOperatorImpl___": {
     "contract": "PolyOperator",
     "address": "0x037355Fc83F1D9Ca34868488C0414a8a1F43ddD6"
+  },
+  "PolyOperatorImpl": {
+    "contract": "PolyOperator",
+    "address": "0xD037c36dbc81a8890728D850E080e38F6EeB95EF"
   },
   "polyOperatorUSX": {
     "contract": "PolyOperator",
@@ -50,5 +54,10 @@
     "contract": "dForceLendingProvider",
     "path": "contracts/base/providers/",
     "address": "0x40F8417d3c98847Eb553785b607EDD64F90A213A"
+  },
+  "polyOperatorUSXCleanupImpl": {
+    "contract": "PolyOperator",
+    "path": "contracts/",
+    "address": "0x0fD11B5ED5B82Ef454BEe2516D1b23d1b07b6c46"
   }
 }

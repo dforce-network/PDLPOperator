@@ -105,3 +105,10 @@ dist
 
 # remix compiled file
 artifacts/
+cache/
+
+artifacts-zk/
+cache-zk/
+
+.yarn
+.yarnrc.yml

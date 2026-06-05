@@ -51,8 +51,17 @@
     "contract": "EthereumOperator",
     "address": "0xeb8F955DAC5EDdD52489b1B361F87f6aA8830E10"
   },
-  "ethereumOperatorImpl": {
+  "ethereumOperatorImpl______": {
     "contract": "EthereumOperator",
     "address": "0x639120d9C5595573321d34F6ee8B97784f42c734"
+  },
+  "ethereumOperatorImpl": {
+    "contract": "EthereumOperator",
+    "address": "0x3f9E89ce069C3a5CAD749C9D953E9b57bEcCb236"
+  },
+  "ethereumOperatorCleanupImpl": {
+    "contract": "EthereumOperator",
+    "path": "contracts/",
+    "address": "0x53386111A7e32b4079e69550A000eD5B9bA628CA"
   }
 }
