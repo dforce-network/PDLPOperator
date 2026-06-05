@@ -32,5 +32,10 @@
     "contract": "dForceLendingProvider",
     "path": "contracts/base/providers/",
     "address": "0x1De84422D17D7296F656B5307A9736044fEb71FA"
+  },
+  "arbiOperatorUSXCleanupImpl": {
+    "contract": "ArbiOperator",
+    "path": "contracts/",
+    "address": "0xf56A6c78f28AC450DB0A4e1367408B78AdD2d02D"
   }
 }

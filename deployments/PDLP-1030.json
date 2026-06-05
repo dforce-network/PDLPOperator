@@ -31,5 +31,10 @@
     "contract": "dForceLendingProvider",
     "path": "contracts/base/providers/",
     "address": "0x149A632d2F147d08Da4cDBe730b486694Fa4Dd80"
+  },
+  "polyOperatorUSXCleanupImpl": {
+    "contract": "PolyOperator",
+    "path": "contracts/",
+    "address": "0x5bB9048C9F4D4C57b0F4243f56EcBBfD45DA2315"
   }
 }

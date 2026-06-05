@@ -28,5 +28,10 @@
     "contract": "dForceLendingProvider",
     "path": "contracts/base/providers/",
     "address": "0x5385bCC7420012BaBd14675A466e24FBE2f9b1D6"
+  },
+  "opOperatorCleanupImpl": {
+    "contract": "OpOperator",
+    "path": "contracts/",
+    "address": "0xf972df23d8296d5e14F2B8CafF71Ca94A68Dc069"
   }
 }
